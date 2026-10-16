@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+
+  studio_testing_db:
+    image: postgres:13.2
+    restart: always
+    volumes:
+      - ${DB_VOLUME}:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      studio_network:
+        aliases:
+          - db
+
+  studio_testing_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "${BACKEND_COMMAND}"
+    volumes:
+      - ${APP_VOLUME}:/studio
+      - ${STATIC_VOLUME}:/studio/static
+      - ${MEDIA_VOLUME}:/studio/media
+    env_file:
+      - .env
+    depends_on:
+      - studio_testing_db
+    restart: always
+    networks:
+      - studio_network
+
+  studio_testing_nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "${NGINX_PORT}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ${STATIC_VOLUME}:/studio/static
+      - ${MEDIA_VOLUME}:/studio/media
+    depends_on:
+      - studio_testing_backend
+    restart: always
+    networks:
+      - studio_network
+
+networks:
+  studio_network:
