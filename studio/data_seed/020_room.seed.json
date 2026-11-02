@@ -1,0 +1,62 @@
+[
+    {
+        "model": "rooms.room",
+        "pk": 1,
+        "fields": {
+            "studio": 1,
+            "name": "Sala Principal",
+            "capacity": 20,
+            "is_active": true,
+            "created_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 2,
+        "fields": {
+            "studio": 1,
+            "name": "Sala B",
+            "capacity": 10,
+            "is_active": true,
+            "created_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 3,
+        "fields": {
+            "studio": 2,
+            "name": "Sala Yoga Belgrano",
+            "capacity": 15,
+            "is_active": true,
+            "created_at": "2024-03-05T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 4,
+        "fields": {
+            "studio": 3,
+            "name": "Sala Musculación Palermo",
+            "capacity": 30,
+            "is_active": true,
+            "created_at": "2024-03-06T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 5,
+        "fields": {
+            "studio": 1,
+            "name": "Sala VIP Central",
+            "capacity": 5,
+            "is_active": true,
+            "created_at": "2024-03-08T12:00:00Z",
+            "deleted": null
+        }
+    }
+]

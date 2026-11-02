@@ -1,0 +1,82 @@
+[
+    {
+        "model": "users.customuser",
+        "pk": 1,
+        "fields": {
+            "email": "super@studio.local",
+            "name": "Super",
+            "last_name": "Studio",
+            "password": "pbkdf2_sha256$600000$0c346db4b6e06f45c3669b$cFqogG1YgKo6ZZlj7SD+D9G/FzXHv5on6mYnTETj6ww=",
+            "dni": "30111222",
+            "tipo_usuario": 1,
+            "is_staff": true,
+            "is_superuser": true,
+            "is_active": true,
+            "code": "1222"
+        }
+    },
+    {
+        "model": "users.customuser",
+        "pk": 2,
+        "fields": {
+            "email": "admin@studio.local",
+            "name": "Admin",
+            "last_name": "Studio",
+            "password": "pbkdf2_sha256$600000$3e10eb65205f124b4b1425$boKlwDe8g3YDJkLZYXwq56Y835XHA9H1a7JeLnDDIos=",
+            "dni": "30222333",
+            "tipo_usuario": 2,
+            "is_staff": true,
+            "is_superuser": false,
+            "is_active": true,
+            "code": "2333"
+        }
+    },
+    {
+        "model": "users.customuser",
+        "pk": 3,
+        "fields": {
+            "email": "recepcion@studio.local",
+            "name": "Recepcion",
+            "last_name": "Studio",
+            "password": "pbkdf2_sha256$600000$611cee30c8a9b44330aa03$fB8f+KXQaiDhcvClgzmBPTc31WexHV3l4EYjANFdqRw=",
+            "dni": "30333444",
+            "tipo_usuario": 3,
+            "is_staff": false,
+            "is_superuser": false,
+            "is_active": true,
+            "code": "3444"
+        }
+    },
+    {
+        "model": "users.customuser",
+        "pk": 4,
+        "fields": {
+            "email": "juan.admin@example.com",
+            "name": "Juan",
+            "last_name": "Administrador",
+            "password": "pbkdf2_sha256$600000$c654032fababd4f2eb0d7c$AdR4gxhFEADlfvUOwfRi2gLqMiPxXRZPf/oeNeSZC/8=",
+            "dni": "99887766",
+            "tipo_usuario": 2,
+            "is_staff": true,
+            "is_superuser": false,
+            "is_active": true,
+            "code": "7766"
+        }
+    },
+    {
+        "model": "users.customuser",
+        "pk": 5,
+        "fields": {
+            "email": "maria.consultora@example.com",
+            "name": "Maria",
+            "last_name": "Consulta",
+            "password": "pbkdf2_sha256$600000$24baf86efb329d41c0499b$59yn7RliaYqqZZvqVuvb3o9A5Jkw4Km7WHoHxqGA68E=",
+            "dni": "11224455",
+            "tipo_usuario": 3,
+            "is_staff": false,
+            "is_superuser": false,
+            "is_active": true,
+            "code": "4455"
+        }
+    }
+]

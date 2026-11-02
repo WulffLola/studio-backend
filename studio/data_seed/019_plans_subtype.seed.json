@@ -1,0 +1,62 @@
+[
+    {
+        "model": "plans_subtype.planssubtype",
+        "pk": 1,
+        "fields": {
+            "name": "Mañana",
+            "plan_type": 1,
+            "activity_subtype": 1,
+            "price_cash": "25000.00",
+            "price_transfer": "28000.00",
+            "deleted": null
+        }
+    },
+    {
+        "model": "plans_subtype.planssubtype",
+        "pk": 2,
+        "fields": {
+            "name": "Tarde",
+            "plan_type": 1,
+            "activity_subtype": 2,
+            "price_cash": "25000.00",
+            "price_transfer": "28000.00",
+            "deleted": null
+        }
+    },
+    {
+        "model": "plans_subtype.planssubtype",
+        "pk": 3,
+        "fields": {
+            "name": "Full",
+            "plan_type": 1,
+            "activity_subtype": 1,
+            "price_cash": "30000.00",
+            "price_transfer": "33000.00",
+            "deleted": null
+        }
+    },
+    {
+        "model": "plans_subtype.planssubtype",
+        "pk": 4,
+        "fields": {
+            "name": "Fin de Semana",
+            "plan_type": 1,
+            "activity_subtype": 1,
+            "price_cash": "20000.00",
+            "price_transfer": "22000.00",
+            "deleted": null
+        }
+    },
+    {
+        "model": "plans_subtype.planssubtype",
+        "pk": 5,
+        "fields": {
+            "name": "Estudiantes",
+            "plan_type": 1,
+            "activity_subtype": 3,
+            "price_cash": "18000.00",
+            "price_transfer": "20000.00",
+            "deleted": null
+        }
+    }
+]

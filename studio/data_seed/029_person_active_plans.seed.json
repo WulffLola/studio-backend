@@ -1,0 +1,62 @@
+[
+    {
+        "model": "people.personactiveplan",
+        "pk": 1,
+        "fields": {
+            "person": 1,
+            "plans_subtype": 1,
+            "exp_date": "2026-02-15",
+            "sessions_total": 8,
+            "sessions_remaining": 0,
+            "deleted": null
+        }
+    },
+    {
+        "model": "people.personactiveplan",
+        "pk": 2,
+        "fields": {
+            "person": 2,
+            "plans_subtype": 2,
+            "exp_date": "2026-02-28",
+            "sessions_total": 4,
+            "sessions_remaining": 2,
+            "deleted": null
+        }
+    },
+    {
+        "model": "people.personactiveplan",
+        "pk": 3,
+        "fields": {
+            "person": 3,
+            "plans_subtype": 3,
+            "exp_date": "2026-01-31",
+            "sessions_total": 12,
+            "sessions_remaining": 5,
+            "deleted": null
+        }
+    },
+    {
+        "model": "people.personactiveplan",
+        "pk": 4,
+        "fields": {
+            "person": 4,
+            "plans_subtype": 1,
+            "exp_date": "2026-04-21",
+            "sessions_total": 8,
+            "sessions_remaining": 6,
+            "deleted": null
+        }
+    },
+    {
+        "model": "people.personactiveplan",
+        "pk": 5,
+        "fields": {
+            "person": 5,
+            "plans_subtype": 2,
+            "exp_date": "2026-05-01",
+            "sessions_total": 4,
+            "sessions_remaining": 4,
+            "deleted": null
+        }
+    }
+]

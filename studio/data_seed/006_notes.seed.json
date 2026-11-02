@@ -1,0 +1,57 @@
+[
+    {
+        "model": "notes.note",
+        "pk": 1,
+        "fields": {
+            "titulo": "Recordatorio de Limpieza",
+            "descripcion": "Mantener las salas limpias después de cada sesión.",
+            "estado": "activo",
+            "created_at": "2024-03-04T12:00:00Z",
+            "updated_at": "2024-03-04T12:00:00Z"
+        }
+    },
+    {
+        "model": "notes.note",
+        "pk": 2,
+        "fields": {
+            "titulo": "Mantenimiento Máquinas",
+            "descripcion": "Revisar las poleas de la sala principal.",
+            "estado": "activo",
+            "created_at": "2024-03-05T10:00:00Z",
+            "updated_at": "2024-03-05T10:00:00Z"
+        }
+    },
+    {
+        "model": "notes.note",
+        "pk": 3,
+        "fields": {
+            "titulo": "Stock de Agua",
+            "descripcion": "Pedir bidones para el dispenser.",
+            "estado": "activo",
+            "created_at": "2024-03-06T09:00:00Z",
+            "updated_at": "2024-03-06T09:00:00Z"
+        }
+    },
+    {
+        "model": "notes.note",
+        "pk": 4,
+        "fields": {
+            "titulo": "Horarios Semana Santa",
+            "descripcion": "Publicar los cambios de horario para el feriado.",
+            "estado": "borrador",
+            "created_at": "2024-03-07T15:00:00Z",
+            "updated_at": "2024-03-07T15:00:00Z"
+        }
+    },
+    {
+        "model": "notes.note",
+        "pk": 5,
+        "fields": {
+            "titulo": "Nuevo Instructor",
+            "descripcion": "Presentar a Carlos en la clase de las 18hs.",
+            "estado": "activo",
+            "created_at": "2024-03-08T08:00:00Z",
+            "updated_at": "2024-03-08T08:00:00Z"
+        }
+    }
+]

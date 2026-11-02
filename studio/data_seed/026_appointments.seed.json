@@ -1,0 +1,62 @@
+[
+    {
+        "model": "appointments.appointment",
+        "pk": 1,
+        "fields": {
+            "person": 1,
+            "slot": 1,
+            "reserved": true,
+            "created_at": "2024-03-04T12:00:00Z",
+            "updated_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "appointments.appointment",
+        "pk": 2,
+        "fields": {
+            "person": 2,
+            "slot": 2,
+            "reserved": true,
+            "created_at": "2024-03-05T12:00:00Z",
+            "updated_at": "2024-03-05T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "appointments.appointment",
+        "pk": 3,
+        "fields": {
+            "person": 3,
+            "slot": 3,
+            "reserved": true,
+            "created_at": "2024-03-06T12:00:00Z",
+            "updated_at": "2024-03-06T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "appointments.appointment",
+        "pk": 4,
+        "fields": {
+            "person": 4,
+            "slot": 4,
+            "reserved": true,
+            "created_at": "2024-03-07T12:00:00Z",
+            "updated_at": "2024-03-07T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "appointments.appointment",
+        "pk": 5,
+        "fields": {
+            "person": 5,
+            "slot": 5,
+            "reserved": true,
+            "created_at": "2024-03-08T12:00:00Z",
+            "updated_at": "2024-03-08T12:00:00Z",
+            "deleted": null
+        }
+    }
+]

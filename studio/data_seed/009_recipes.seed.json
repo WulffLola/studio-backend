@@ -1,0 +1,67 @@
+[
+    {
+        "model": "recipes.recipe",
+        "pk": 1,
+        "fields": {
+            "titulo": "Batido de Proteína Saludable",
+            "descripcion": "Un batido energizante para después de entrenar.",
+            "ingredientes": "1 banana, 1 scoop de proteína, 200ml de leche de almendras, hielo.",
+            "pasos": "1. Poner todo en la licuadora. 2. Licuar por 30 segundos. 3. Servir y disfrutar.",
+            "estado": "activo",
+            "created_at": "2024-03-04T12:00:00Z",
+            "updated_at": "2024-03-04T12:00:00Z"
+        }
+    },
+    {
+        "model": "recipes.recipe",
+        "pk": 2,
+        "fields": {
+            "titulo": "Ensalada Nutritiva",
+            "descripcion": "Una comida ligera y llena de vitaminas.",
+            "ingredientes": "Espinaca, tomate cherry, palta, pollo grillado, semillas de sésamo.",
+            "pasos": "1. Lavar vegetales. 2. Cortar el pollo. 3. Mezclar todo en un bowl. 4. Condimentar al gusto.",
+            "estado": "activo",
+            "created_at": "2024-03-05T12:00:00Z",
+            "updated_at": "2024-03-05T12:00:00Z"
+        }
+    },
+    {
+        "model": "recipes.recipe",
+        "pk": 3,
+        "fields": {
+            "titulo": "Avena con Frutas",
+            "descripcion": "Desayuno ideal para tener energía todo el día.",
+            "ingredientes": "Avena instantánea, leche, miel, arándanos, nueces.",
+            "pasos": "1. Cocinar la avena con leche. 2. Endulzar con miel. 3. Agregar frutas y nueces arriba.",
+            "estado": "activo",
+            "created_at": "2024-03-06T08:00:00Z",
+            "updated_at": "2024-03-06T08:00:00Z"
+        }
+    },
+    {
+        "model": "recipes.recipe",
+        "pk": 4,
+        "fields": {
+            "titulo": "Omelette de Claras",
+            "descripcion": "Proteína pura para el crecimiento muscular.",
+            "ingredientes": "3 claras de huevo, 1 huevo entero, queso port salut, orégano.",
+            "pasos": "1. Batir los huevos. 2. Verter en sartén caliente. 3. Agregar queso y doblar. 4. Servir.",
+            "estado": "activo",
+            "created_at": "2024-03-07T09:00:00Z",
+            "updated_at": "2024-03-07T09:00:00Z"
+        }
+    },
+    {
+        "model": "recipes.recipe",
+        "pk": 5,
+        "fields": {
+            "titulo": "Yogur con Granola",
+            "descripcion": "Snack rápido y saludable.",
+            "ingredientes": "Yogur griego natural, granola artesanal, rodajas de manzana.",
+            "pasos": "1. Poner el yogur en una taza. 2. Espolvorear granola. 3. Decorar con manzana.",
+            "estado": "activo",
+            "created_at": "2024-03-08T16:00:00Z",
+            "updated_at": "2024-03-08T16:00:00Z"
+        }
+    }
+]

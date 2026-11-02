@@ -1,0 +1,77 @@
+[
+    {
+        "model": "slots.slot",
+        "pk": 1,
+        "fields": {
+            "template": null,
+            "date": "2026-03-23",
+            "room": 1,
+            "activity_subtype": 1,
+            "status": 1,
+            "start_time": "09:00:00",
+            "end_time": "10:00:00",
+            "availability": 20,
+            "deleted": null
+        }
+    },
+    {
+        "model": "slots.slot",
+        "pk": 2,
+        "fields": {
+            "template": null,
+            "date": "2026-03-23",
+            "room": 1,
+            "activity_subtype": 1,
+            "status": 1,
+            "start_time": "10:00:00",
+            "end_time": "11:00:00",
+            "availability": 20,
+            "deleted": null
+        }
+    },
+    {
+        "model": "slots.slot",
+        "pk": 3,
+        "fields": {
+            "template": null,
+            "date": "2026-03-24",
+            "room": 2,
+            "activity_subtype": 3,
+            "status": 1,
+            "start_time": "15:00:00",
+            "end_time": "16:00:00",
+            "availability": 10,
+            "deleted": null
+        }
+    },
+    {
+        "model": "slots.slot",
+        "pk": 4,
+        "fields": {
+            "template": null,
+            "date": "2026-03-25",
+            "room": 3,
+            "activity_subtype": 5,
+            "status": 1,
+            "start_time": "18:00:00",
+            "end_time": "19:00:00",
+            "availability": 15,
+            "deleted": null
+        }
+    },
+    {
+        "model": "slots.slot",
+        "pk": 5,
+        "fields": {
+            "template": null,
+            "date": "2026-03-26",
+            "room": 1,
+            "activity_subtype": 4,
+            "status": 1,
+            "start_time": "08:00:00",
+            "end_time": "09:00:00",
+            "availability": 20,
+            "deleted": null
+        }
+    }
+]

@@ -1,0 +1,93 @@
+[
+    {
+        "model": "actions.action",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "action": "CREATE",
+            "target": "Person",
+            "target_id": "1",
+            "old_value": [],
+            "new_value": [
+                {
+                    "name": "Juan"
+                }
+            ],
+            "timestamp": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "actions.action",
+        "pk": 2,
+        "fields": {
+            "user": 1,
+            "action": "UPDATE",
+            "target": "Plan",
+            "target_id": "2",
+            "old_value": [
+                {
+                    "price": 10000
+                }
+            ],
+            "new_value": [
+                {
+                    "price": 15000
+                }
+            ],
+            "timestamp": "2024-03-05T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "actions.action",
+        "pk": 3,
+        "fields": {
+            "user": 2,
+            "action": "CREATE",
+            "target": "Appointment",
+            "target_id": "1",
+            "old_value": [],
+            "new_value": [
+                {
+                    "person": 1,
+                    "slot": 1
+                }
+            ],
+            "timestamp": "2024-03-06T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "actions.action",
+        "pk": 4,
+        "fields": {
+            "user": 4,
+            "action": "DELETE",
+            "target": "Note",
+            "target_id": "10",
+            "old_value": [
+                {
+                    "title": "Old Note"
+                }
+            ],
+            "new_value": [],
+            "timestamp": "2024-03-07T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "actions.action",
+        "pk": 5,
+        "fields": {
+            "user": 1,
+            "action": "LOGIN",
+            "target": "User",
+            "target_id": "1",
+            "old_value": [],
+            "new_value": [],
+            "timestamp": "2024-03-08T12:00:00Z",
+            "deleted": null
+        }
+    }
+]

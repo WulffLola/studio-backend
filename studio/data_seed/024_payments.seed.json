@@ -1,0 +1,132 @@
+[
+    {
+        "model": "payments.payment",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "person": 1,
+            "date": "2024-03-04T15:00:00Z",
+            "amount": "15000",
+            "studio": 1,
+            "method": "Transferencia",
+            "observation": "Pago mensualidad marzo",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.payment",
+        "pk": 2,
+        "fields": {
+            "user": 1,
+            "person": 2,
+            "date": "2024-03-05T10:00:00Z",
+            "amount": "5000",
+            "studio": 2,
+            "method": "Efectivo",
+            "observation": "Pago clases sueltas",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.payment",
+        "pk": 3,
+        "fields": {
+            "user": 1,
+            "person": 3,
+            "date": "2024-03-06T11:00:00Z",
+            "amount": "25000",
+            "studio": 3,
+            "method": "Tarjeta Crédito",
+            "observation": "Pago plan trimestral",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.payment",
+        "pk": 4,
+        "fields": {
+            "user": 1,
+            "person": 4,
+            "date": "2024-03-07T12:00:00Z",
+            "amount": "12000",
+            "studio": 4,
+            "method": "Mercado Pago",
+            "observation": "Pago Mar-Abr",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.payment",
+        "pk": 5,
+        "fields": {
+            "user": 1,
+            "person": 5,
+            "date": "2024-03-08T09:00:00Z",
+            "amount": "20000",
+            "studio": 5,
+            "method": "Débito",
+            "observation": "Suscripción anual",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.paymentitem",
+        "pk": 1,
+        "fields": {
+            "payment": 1,
+            "plans_subtype": 1,
+            "base_amount": "15000.00",
+            "discount_pct": "0.00",
+            "final_amount": "15000.00",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.paymentitem",
+        "pk": 2,
+        "fields": {
+            "payment": 2,
+            "plans_subtype": 1,
+            "base_amount": "5000.00",
+            "discount_pct": "0.00",
+            "final_amount": "5000.00",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.paymentitem",
+        "pk": 3,
+        "fields": {
+            "payment": 3,
+            "plans_subtype": 1,
+            "base_amount": "25000.00",
+            "discount_pct": "10.00",
+            "final_amount": "22500.00",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.paymentitem",
+        "pk": 4,
+        "fields": {
+            "payment": 4,
+            "plans_subtype": 1,
+            "base_amount": "12000.00",
+            "discount_pct": "0.00",
+            "final_amount": "12000.00",
+            "deleted": null
+        }
+    },
+    {
+        "model": "payments.paymentitem",
+        "pk": 5,
+        "fields": {
+            "payment": 5,
+            "plans_subtype": 1,
+            "base_amount": "20000.00",
+            "discount_pct": "5.00",
+            "final_amount": "19000.00",
+            "deleted": null
+        }
+    }
+]

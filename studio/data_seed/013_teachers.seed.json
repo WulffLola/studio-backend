@@ -1,0 +1,87 @@
+[
+    {
+        "model": "teachers.teacher",
+        "pk": 1,
+        "fields": {
+            "name": "Carlos",
+            "last_name": "Instructor",
+            "sex": "M",
+            "dni": "11223344",
+            "email": "carlos.teacher@example.com",
+            "phone": "1144556677",
+            "birth_date": "1985-03-20",
+            "hours": "40",
+            "created_at": "2024-03-04T12:00:00Z",
+            "updated_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers.teacher",
+        "pk": 2,
+        "fields": {
+            "name": "Ana",
+            "last_name": "Profe",
+            "sex": "F",
+            "dni": "44332211",
+            "email": "ana.profe@example.com",
+            "phone": "1188990011",
+            "birth_date": "1988-10-10",
+            "hours": "20",
+            "created_at": "2024-03-04T12:00:00Z",
+            "updated_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers.teacher",
+        "pk": 3,
+        "fields": {
+            "name": "Roberto",
+            "last_name": "Gomez",
+            "sex": "M",
+            "dni": "12121212",
+            "email": "roberto.g@example.com",
+            "phone": "1199998888",
+            "birth_date": "1980-05-05",
+            "hours": "30",
+            "created_at": "2024-03-05T12:00:00Z",
+            "updated_at": "2024-03-05T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers.teacher",
+        "pk": 4,
+        "fields": {
+            "name": "Lucia",
+            "last_name": "Sosa",
+            "sex": "F",
+            "dni": "34343434",
+            "email": "lucia.s@example.com",
+            "phone": "1177776666",
+            "birth_date": "1992-08-15",
+            "hours": "25",
+            "created_at": "2024-03-06T12:00:00Z",
+            "updated_at": "2024-03-06T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers.teacher",
+        "pk": 5,
+        "fields": {
+            "name": "Miguel",
+            "last_name": "Angel",
+            "sex": "M",
+            "dni": "56565656",
+            "email": "miguel.a@example.com",
+            "phone": "1155554444",
+            "birth_date": "1987-12-01",
+            "hours": "40",
+            "created_at": "2024-03-07T12:00:00Z",
+            "updated_at": "2024-03-07T12:00:00Z",
+            "deleted": null
+        }
+    }
+]

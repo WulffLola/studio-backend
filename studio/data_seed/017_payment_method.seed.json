@@ -1,0 +1,52 @@
+[
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 1,
+        "fields": {
+            "amount": "15000",
+            "method": "Transferencia",
+            "plan": 2,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 2,
+        "fields": {
+            "amount": "5000",
+            "method": "Efectivo",
+            "plan": 1,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 3,
+        "fields": {
+            "amount": "25000",
+            "method": "Tarjeta Crédito",
+            "plan": 3,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 4,
+        "fields": {
+            "amount": "12000",
+            "method": "Mercado Pago",
+            "plan": 2,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 5,
+        "fields": {
+            "amount": "20000",
+            "method": "Débito",
+            "plan": 4,
+            "deleted": null
+        }
+    }
+]

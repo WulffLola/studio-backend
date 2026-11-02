@@ -1,0 +1,31 @@
+[
+    {
+      "model": "user_type.usertype",
+      "pk": 1,
+      "fields": {
+        "user_type_name": "Super"
+      }
+    },
+    {
+      "model": "user_type.usertype",
+      "pk": 2,
+      "fields": {
+        "user_type_name": "Administrador"
+      }
+    },
+    {
+      "model": "user_type.usertype",
+      "pk": 3,
+      "fields": {
+        "user_type_name": "Consultor"
+      }
+    },
+        {
+      "model": "user_type.usertype",
+      "pk": 4,
+      "fields": {
+        "user_type_name": "Estudiante"
+      }
+    }
+  ]
+  

@@ -1,0 +1,57 @@
+[
+    {
+        "model": "studios.studio",
+        "pk": 1,
+        "fields": {
+            "name": "Studio Central",
+            "address": "Calle Falsa 123",
+            "is_active": true,
+            "created_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "studios.studio",
+        "pk": 2,
+        "fields": {
+            "name": "Studio Belgrano",
+            "address": "Av. Cabildo 1500",
+            "is_active": true,
+            "created_at": "2024-03-05T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "studios.studio",
+        "pk": 3,
+        "fields": {
+            "name": "Studio Palermo",
+            "address": "Fitz Roy 2500",
+            "is_active": true,
+            "created_at": "2024-03-06T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "studios.studio",
+        "pk": 4,
+        "fields": {
+            "name": "Studio Caballito",
+            "address": "Av. Rivadavia 4500",
+            "is_active": false,
+            "created_at": "2024-03-07T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "studios.studio",
+        "pk": 5,
+        "fields": {
+            "name": "Studio Pilar",
+            "address": "Ruta 8 Km 50",
+            "is_active": true,
+            "created_at": "2024-03-08T12:00:00Z",
+            "deleted": null
+        }
+    }
+]

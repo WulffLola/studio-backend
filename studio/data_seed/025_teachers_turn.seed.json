@@ -1,0 +1,67 @@
+[
+    {
+        "model": "teachers_turn.teachersturn",
+        "pk": 1,
+        "fields": {
+            "teacher": 1,
+            "slot": 1,
+            "is_receptionist": false,
+            "rol": "Instructor Principal",
+            "created_at": "2024-03-04T12:00:00Z",
+            "updated_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers_turn.teachersturn",
+        "pk": 2,
+        "fields": {
+            "teacher": 2,
+            "slot": 2,
+            "is_receptionist": true,
+            "rol": "Recepcionista Tarde",
+            "created_at": "2024-03-05T12:00:00Z",
+            "updated_at": "2024-03-05T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers_turn.teachersturn",
+        "pk": 3,
+        "fields": {
+            "teacher": 3,
+            "slot": 3,
+            "is_receptionist": false,
+            "rol": "Apoyo Circuito",
+            "created_at": "2024-03-06T12:00:00Z",
+            "updated_at": "2024-03-06T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers_turn.teachersturn",
+        "pk": 4,
+        "fields": {
+            "teacher": 4,
+            "slot": 4,
+            "is_receptionist": false,
+            "rol": "Yoga Belgrano",
+            "created_at": "2024-03-07T12:00:00Z",
+            "updated_at": "2024-03-07T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers_turn.teachersturn",
+        "pk": 5,
+        "fields": {
+            "teacher": 1,
+            "slot": 5,
+            "is_receptionist": false,
+            "rol": "Instructor VIP",
+            "created_at": "2024-03-08T12:00:00Z",
+            "updated_at": "2024-03-08T12:00:00Z",
+            "deleted": null
+        }
+    }
+]

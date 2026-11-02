@@ -1,0 +1,42 @@
+[
+    {
+        "model": "status.status",
+        "pk": 1,
+        "fields": {
+            "status": "Lugares Libres",
+            "deleted": null
+        }
+    },
+    {
+        "model": "status.status",
+        "pk": 2,
+        "fields": {
+            "status": "Ocupado",
+            "deleted": null
+        }
+    },
+    {
+        "model": "status.status",
+        "pk": 3,
+        "fields": {
+            "status": "En Espera",
+            "deleted": null
+        }
+    },
+    {
+        "model": "status.status",
+        "pk": 4,
+        "fields": {
+            "status": "Cancelado",
+            "deleted": null
+        }
+    },
+    {
+        "model": "status.status",
+        "pk": 5,
+        "fields": {
+            "status": "Mantenimiento",
+            "deleted": null
+        }
+    }
+]

@@ -1,0 +1,52 @@
+[
+    {
+        "model": "extra_hours.extrahours",
+        "pk": 1,
+        "fields": {
+            "teacher": 1,
+            "slot": 2,
+            "price": 1500.0,
+            "deleted": null
+        }
+    },
+    {
+        "model": "extra_hours.extrahours",
+        "pk": 2,
+        "fields": {
+            "teacher": 2,
+            "slot": 3,
+            "price": 2000.0,
+            "deleted": null
+        }
+    },
+    {
+        "model": "extra_hours.extrahours",
+        "pk": 3,
+        "fields": {
+            "teacher": 3,
+            "slot": 1,
+            "price": 1800.0,
+            "deleted": null
+        }
+    },
+    {
+        "model": "extra_hours.extrahours",
+        "pk": 4,
+        "fields": {
+            "teacher": 4,
+            "slot": 4,
+            "price": 2200.0,
+            "deleted": null
+        }
+    },
+    {
+        "model": "extra_hours.extrahours",
+        "pk": 5,
+        "fields": {
+            "teacher": 5,
+            "slot": 5,
+            "price": 2500.0,
+            "deleted": null
+        }
+    }
+]

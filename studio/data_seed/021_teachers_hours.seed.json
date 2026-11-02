@@ -1,0 +1,67 @@
+[
+    {
+        "model": "teachers_hours.hour",
+        "pk": 1,
+        "fields": {
+            "teacher": 1,
+            "month": "Marzo 2024",
+            "hour": "160",
+            "extra_hour": "10",
+            "total": "170",
+            "left": "0",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers_hours.hour",
+        "pk": 2,
+        "fields": {
+            "teacher": 2,
+            "month": "Marzo 2024",
+            "hour": "80",
+            "extra_hour": "5",
+            "total": "85",
+            "left": "0",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers_hours.hour",
+        "pk": 3,
+        "fields": {
+            "teacher": 3,
+            "month": "Marzo 2024",
+            "hour": "120",
+            "extra_hour": "0",
+            "total": "120",
+            "left": "0",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers_hours.hour",
+        "pk": 4,
+        "fields": {
+            "teacher": 4,
+            "month": "Marzo 2024",
+            "hour": "100",
+            "extra_hour": "2",
+            "total": "102",
+            "left": "0",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teachers_hours.hour",
+        "pk": 5,
+        "fields": {
+            "teacher": 5,
+            "month": "Marzo 2024",
+            "hour": "160",
+            "extra_hour": "15",
+            "total": "175",
+            "left": "0",
+            "deleted": null
+        }
+    }
+]

@@ -1,0 +1,60 @@
+[
+    {
+        "model": "weeks.week",
+        "pk": 1,
+        "fields": {
+            "day": "Lunes",
+            "deleted": null
+        }
+    },
+    {
+        "model": "weeks.week",
+        "pk": 2,
+        "fields": {
+            "day": "Martes",
+            "deleted": null
+        }
+    },
+    {
+        "model": "weeks.week",
+        "pk": 3,
+        "fields": {
+            "day": "Miércoles",
+            "deleted": null
+        }
+    },
+    {
+        "model": "weeks.week",
+        "pk": 4,
+        "fields": {
+            "day": "Jueves",
+            "deleted": null
+        }
+    },
+    {
+        "model": "weeks.week",
+        "pk": 5,
+        "fields": {
+            "day": "Viernes",
+            "deleted": null
+        }
+    },
+    {
+        "model": "weeks.week",
+        "pk": 6,
+        "fields": {
+            "day": "Sábado",
+            "deleted": null
+        }
+    },
+    {
+        "model": "weeks.week",
+        "pk": 7,
+        "fields": {
+            "day": "Domingo",
+            "deleted": null
+        }
+    }
+]
+
+

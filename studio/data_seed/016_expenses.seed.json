@@ -1,0 +1,67 @@
+[
+    {
+        "model": "expenses.expense",
+        "pk": 1,
+        "fields": {
+            "amount": "5000",
+            "studio": 1,
+            "date": "2024-03-04T12:00:00Z",
+            "type": 1,
+            "method": "Efectivo",
+            "observation": "Compra de artículos de limpieza",
+            "deleted": null
+        }
+    },
+    {
+        "model": "expenses.expense",
+        "pk": 2,
+        "fields": {
+            "amount": "150000",
+            "studio": 2,
+            "date": "2024-03-05T10:00:00Z",
+            "type": 3,
+            "method": "Transferencia",
+            "observation": "Alquiler Local Marzo",
+            "deleted": null
+        }
+    },
+    {
+        "model": "expenses.expense",
+        "pk": 3,
+        "fields": {
+            "amount": "12000",
+            "studio": 3,
+            "date": "2024-03-06T11:00:00Z",
+            "type": 4,
+            "method": "Efectivo",
+            "observation": "Factura de Luz",
+            "deleted": null
+        }
+    },
+    {
+        "model": "expenses.expense",
+        "pk": 4,
+        "fields": {
+            "amount": "80000",
+            "studio": 4,
+            "date": "2024-03-07T18:00:00Z",
+            "type": 2,
+            "method": "Transferencia",
+            "observation": "Sueldo Carlos Profe",
+            "deleted": null
+        }
+    },
+    {
+        "model": "expenses.expense",
+        "pk": 5,
+        "fields": {
+            "amount": "4500",
+            "studio": 5,
+            "date": "2024-03-08T09:00:00Z",
+            "type": 1,
+            "method": "Efectivo",
+            "observation": "Papelería oficina",
+            "deleted": null
+        }
+    }
+]

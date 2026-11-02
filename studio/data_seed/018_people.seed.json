@@ -1,0 +1,92 @@
+[
+    {
+        "model": "people.person",
+        "pk": 1,
+        "fields": {
+            "name": "Juan",
+            "last_name": "Perez",
+            "sex": "M",
+            "dni": "12345678",
+            "email": "juan.perez@example.com",
+            "phone": "1122334455",
+            "birth_date": "1990-01-01",
+            "observation": "Socio inicial",
+            "plan": 2,
+            "created_at": "2024-03-04T12:00:00Z",
+            "updated_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "people.person",
+        "pk": 2,
+        "fields": {
+            "name": "Maria",
+            "last_name": "Gomez",
+            "sex": "F",
+            "dni": "87654321",
+            "email": "maria.gomez@example.com",
+            "phone": "1166778899",
+            "birth_date": "1995-05-15",
+            "observation": "Nueva socia",
+            "plan": 1,
+            "created_at": "2024-03-04T12:00:00Z",
+            "updated_at": "2024-03-04T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "people.person",
+        "pk": 3,
+        "fields": {
+            "name": "Pedro",
+            "last_name": "Rodriguez",
+            "sex": "M",
+            "dni": "44556677",
+            "email": "pedro.r@example.com",
+            "phone": "1133332222",
+            "birth_date": "1988-02-10",
+            "observation": "Alumno habitual",
+            "plan": 3,
+            "created_at": "2024-03-05T12:00:00Z",
+            "updated_at": "2024-03-05T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "people.person",
+        "pk": 4,
+        "fields": {
+            "name": "Laura",
+            "last_name": "Fernandez",
+            "sex": "F",
+            "dni": "55667788",
+            "email": "laura.f@example.com",
+            "phone": "1122221111",
+            "birth_date": "1993-11-20",
+            "observation": "Recomendada",
+            "plan": 2,
+            "created_at": "2024-03-06T12:00:00Z",
+            "updated_at": "2024-03-06T12:00:00Z",
+            "deleted": null
+        }
+    },
+    {
+        "model": "people.person",
+        "pk": 5,
+        "fields": {
+            "name": "Diego",
+            "last_name": "Martinez",
+            "sex": "M",
+            "dni": "99001122",
+            "email": "diego.m@example.com",
+            "phone": "1144445555",
+            "birth_date": "1985-07-30",
+            "observation": "Interesado en Crossfit",
+            "plan": 1,
+            "created_at": "2024-03-07T12:00:00Z",
+            "updated_at": "2024-03-07T12:00:00Z",
+            "deleted": null
+        }
+    }
+]

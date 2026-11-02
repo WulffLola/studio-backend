@@ -1,0 +1,42 @@
+[
+    {
+        "model": "teacher_rol.rol",
+        "pk": 1,
+        "fields": {
+            "rol": "Pilates",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teacher_rol.rol",
+        "pk": 2,
+        "fields": {
+            "rol": "Recepción",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teacher_rol.rol",
+        "pk": 3,
+        "fields": {
+            "rol": "Circuito",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teacher_rol.rol",
+        "pk": 4,
+        "fields": {
+            "rol": "Yoga",
+            "deleted": null
+        }
+    },
+    {
+        "model": "teacher_rol.rol",
+        "pk": 5,
+        "fields": {
+            "rol": "Nutrición",
+            "deleted": null
+        }
+    }
+]

@@ -1,0 +1,42 @@
+[
+    {
+        "model": "expense_type.expensetype",
+        "pk": 1,
+        "fields": {
+            "name": "Gastos Chicos",
+            "deleted": null
+        }
+    },
+    {
+        "model": "expense_type.expensetype",
+        "pk": 2,
+        "fields": {
+            "name": "Sueldos",
+            "deleted": null
+        }
+    },
+    {
+        "model": "expense_type.expensetype",
+        "pk": 3,
+        "fields": {
+            "name": "Alquiler",
+            "deleted": null
+        }
+    },
+    {
+        "model": "expense_type.expensetype",
+        "pk": 4,
+        "fields": {
+            "name": "Servicios (Luz/Agua)",
+            "deleted": null
+        }
+    },
+    {
+        "model": "expense_type.expensetype",
+        "pk": 5,
+        "fields": {
+            "name": "Equipamiento",
+            "deleted": null
+        }
+    }
+]

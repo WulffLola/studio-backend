@@ -1,0 +1,42 @@
+[
+    {
+        "model": "plans_type.planstype",
+        "pk": 1,
+        "fields": {
+            "name": "Mensual",
+            "deleted": null
+        }
+    },
+    {
+        "model": "plans_type.planstype",
+        "pk": 2,
+        "fields": {
+            "name": "Semestral",
+            "deleted": null
+        }
+    },
+    {
+        "model": "plans_type.planstype",
+        "pk": 3,
+        "fields": {
+            "name": "Anual",
+            "deleted": null
+        }
+    },
+    {
+        "model": "plans_type.planstype",
+        "pk": 4,
+        "fields": {
+            "name": "Clase Suelta",
+            "deleted": null
+        }
+    },
+    {
+        "model": "plans_type.planstype",
+        "pk": 5,
+        "fields": {
+            "name": "Trimestral",
+            "deleted": null
+        }
+    }
+]

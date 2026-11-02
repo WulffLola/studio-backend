@@ -1,0 +1,62 @@
+[
+    {
+        "model": "holidays.holiday",
+        "pk": 1,
+        "fields": {
+            "name": "Año Nuevo",
+            "start_date": "2025-01-01",
+            "end_date": null,
+            "deleted": null
+        }
+    },
+    {
+        "model": "holidays.holiday",
+        "pk": 2,
+        "fields": {
+            "name": "Navidad",
+            "start_date": "2025-12-25",
+            "end_date": null,
+            "deleted": null
+        }
+    },
+    {
+        "model": "holidays.holiday",
+        "pk": 3,
+        "fields": {
+            "name": "Día del Trabajador",
+            "start_date": "2025-05-01",
+            "end_date": null,
+            "deleted": null
+        }
+    },
+    {
+        "model": "holidays.holiday",
+        "pk": 4,
+        "fields": {
+            "name": "Día de la Independencia",
+            "start_date": "2025-07-09",
+            "end_date": null,
+            "deleted": null
+        }
+    },
+    {
+        "model": "holidays.holiday",
+        "pk": 5,
+        "fields": {
+            "name": "Viernes Santo",
+            "start_date": "2025-04-18",
+            "end_date": null,
+            "deleted": null
+        }
+    },
+    {
+        "model": "holidays.holiday",
+        "pk": 6,
+        "fields": {
+            "name": "Vacaciones de verano",
+            "start_date": "2026-01-01",
+            "end_date": "2026-01-14",
+            "deleted": null
+        }
+    }
+]

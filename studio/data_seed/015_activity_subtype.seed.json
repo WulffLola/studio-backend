@@ -1,0 +1,47 @@
+[
+    {
+        "model": "activity_subtype.activitysubtype",
+        "pk": 1,
+        "fields": {
+            "name": "Hatha Yoga",
+            "activity_type": 1,
+            "deleted": null
+        }
+    },
+    {
+        "model": "activity_subtype.activitysubtype",
+        "pk": 2,
+        "fields": {
+            "name": "Vinyasa Yoga",
+            "activity_type": 1,
+            "deleted": null
+        }
+    },
+    {
+        "model": "activity_subtype.activitysubtype",
+        "pk": 3,
+        "fields": {
+            "name": "Reformer",
+            "activity_type": 2,
+            "deleted": null
+        }
+    },
+    {
+        "model": "activity_subtype.activitysubtype",
+        "pk": 4,
+        "fields": {
+            "name": "Mat Pilates",
+            "activity_type": 2,
+            "deleted": null
+        }
+    },
+    {
+        "model": "activity_subtype.activitysubtype",
+        "pk": 5,
+        "fields": {
+            "name": "Yoga Kids",
+            "activity_type": 1,
+            "deleted": null
+        }
+    }
+]
