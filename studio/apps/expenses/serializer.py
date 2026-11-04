@@ -17,11 +17,14 @@ class ExpenseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        # Verificar que los campos `amount`, `type` y `method` no sean nulos ni vacíos
-        if data.get('amount') is None:
+        # Verificar que los campos `amount`, `type` y `method` no sean nulos ni vacíos.
+        # En un PATCH (partial) solo se validan los campos que vienen.
+        def check(field):
+            return not (self.partial and field not in data)
+        if check('amount') and data.get('amount') is None:
             raise serializers.ValidationError({"amount": "El campo 'amount' es obligatorio."})
-        if not data.get('type'):
+        if check('type') and not data.get('type'):
             raise serializers.ValidationError({"type": "El campo 'type' es obligatorio."})
-        if not data.get('method'):
+        if check('method') and not data.get('method'):
             raise serializers.ValidationError({"method": "El campo 'method' es obligatorio."})
         return data
