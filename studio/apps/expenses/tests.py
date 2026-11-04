@@ -158,15 +158,27 @@ class TestExpenseViewForUser:
         assert response.status_code == 201
         assert Expense.objects.filter(amount='500', type=expense_type).exists()
 
-    def test_consultor_can_delete_expense(self, studio, consultor_client):
-        """El consultor ahora tiene permiso para eliminar gastos."""
+    def test_consultor_can_delete_expense(self, studio, consultor_client, consultor_user):
+        """El consultor puede eliminar gastos ingresando su código personal."""
+        consultor_user.code = '4321'
+        consultor_user.save(update_fields=['code'])
+        expense_type = ExpenseType.objects.create(name='Test Type')
+        expense = Expense.objects.create(amount='200', type=expense_type, studio=studio)
+        url = reverse('expenses-detail', args=[expense.pk])
+        response = consultor_client.delete(url, data={'code': '4321'}, format='json')
+        assert response.status_code == 204
+        expense.refresh_from_db()
+        assert expense.deleted is not None
+
+    def test_consultor_no_puede_usar_atajo_admin(self, studio, consultor_client):
+        """El atajo code='admin' es solo para Administrador y Super."""
         expense_type = ExpenseType.objects.create(name='Test Type')
         expense = Expense.objects.create(amount='200', type=expense_type, studio=studio)
         url = reverse('expenses-detail', args=[expense.pk])
         response = consultor_client.delete(url, data={'code': 'admin'}, format='json')
-        assert response.status_code == 204
+        assert response.status_code == 403
         expense.refresh_from_db()
-        assert expense.deleted is not None
+        assert expense.deleted is None
 
     def test_anonymous_cannot_delete_expense(self, studio):
         """Un usuario anónimo no puede eliminar gastos."""

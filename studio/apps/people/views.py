@@ -1,3 +1,4 @@
+from apps.user_type.permisos import is_admin_or_super
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -46,8 +47,12 @@ class PeopleViewSet(viewsets.ModelViewSet):
 
         # Verificar si el código es "admin" o "super" y usar el usuario logueado
         if code == "admin":
-            if request.user.is_authenticated:
+            # El atajo sin código es solo para Administrador y Super:
+            # el Consultor tiene que ingresar un código válido.
+            if is_admin_or_super(request.user):
                 return request.user
+            if request.user.is_authenticated:
+                return Response({"detail": "Tenés que ingresar un código válido."}, status=status.HTTP_403_FORBIDDEN)
             else:
                 return Response({"detail": "No hay ningún usuario logueado."}, status=status.HTTP_400_BAD_REQUEST)
 

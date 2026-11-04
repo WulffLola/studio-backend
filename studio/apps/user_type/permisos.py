@@ -61,3 +61,10 @@ class StudentReadMixin:
         if self.action in ('list', 'retrieve'):
             return [(base | IsStudent)()]
         return [base()]
+
+
+def is_admin_or_super(user):
+    """True si el usuario logueado es Administrador o Super."""
+    if not user or user.is_anonymous or user.tipo_usuario_id is None:
+        return False
+    return user.tipo_usuario_id in (UserType.get_administrador_pk(), UserType.get_super_pk())
