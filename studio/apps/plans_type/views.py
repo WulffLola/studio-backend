@@ -170,7 +170,7 @@ class AvailablePlansViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         plans = PlansSubtype.objects.select_related(
-            'plans_type',
+            'plan_type',
             'activity_subtype__activity_type',
         ).prefetch_related(
             Prefetch(
@@ -181,7 +181,7 @@ class AvailablePlansViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         ).filter(deleted__isnull=True)
 
         combos = ComboPlanDiscount.objects.prefetch_related(
-            'plans__plans_type'
+            'plans__plan_type'
         ).filter(deleted__isnull=True)
 
         return Response({

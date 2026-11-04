@@ -60,6 +60,7 @@ class PlansSubtypePublicSerializer(serializers.ModelSerializer):
 
     def get_activity_subtypes(self, obj):
         # Cada PlansSubtype ahora tiene su propio activity_subtype directamente.
-        if obj.activity_subtype_id:
-            return ActivitySubtypeInPriceSerializer([obj.activity_subtype], many=True).data
+        sub = obj.activity_subtype if obj.activity_subtype_id else None
+        if sub is not None and getattr(sub, 'deleted', None) is None:
+            return ActivitySubtypeInPriceSerializer([sub], many=True).data
         return []
