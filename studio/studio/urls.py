@@ -160,7 +160,7 @@ urlpatterns = [
     path(r'doc&test/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path("", include(routes.urls)),
     path('teacher-extra-hours/<int:teacher_id>/', TeacherExtraHoursViewSet.as_view({'get': 'list'}), name='teacher-extra-hours'),
-    path('payments/download/<int:payment_id>/', PaymentViewSet.download_pdf, name='download_pdf'),
+    path('payments/download/<int:pk>/', PaymentViewSet.as_view({'get': 'download_pdf'}), name='download_pdf'),
     path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('logout/', UserLogoutViewSet.as_view(), name='logout'),
