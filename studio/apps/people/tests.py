@@ -80,13 +80,41 @@ class TestPeopleViewForUser:
         ids = [item['id'] for item in response.data]
         assert person.id in ids
 
-    def test_consultor_list_excludes_deleted(self, consultor_client):
+    def test_consultor_list_includes_deleted(self, consultor_client):
         person = Person.objects.create(name='Juan', last_name='Perez', dni='12345678')
         person.delete()
         response = consultor_client.get(reverse(self.URL))
         assert response.status_code == 200
         ids = [item['id'] for item in response.data]
+        assert person.id in ids
+
+    def test_super_list_includes_deleted(self, super_client):
+        person = Person.objects.create(name='Juan', last_name='Perez', dni='12345678')
+        person.delete()
+        response = super_client.get(reverse(self.URL))
+        assert response.status_code == 200
+        ids = [item['id'] for item in response.data]
+        assert person.id in ids
+
+    def test_usuario_sin_tipo_no_ve_eliminados(self, monkeypatch):
+        # Si los UserType no estuvieran sembrados, get_*_pk() devolveria None y el set
+        # contendria None: un user con tipo_usuario_id=None no debe ver eliminados.
+        from types import SimpleNamespace
+        from apps.people.views import PeopleViewSet
+        from apps.user_type.models import UserType
+        monkeypatch.setattr(UserType, 'get_super_pk', classmethod(lambda cls: None))
+        monkeypatch.setattr(UserType, 'get_administrador_pk', classmethod(lambda cls: None))
+        monkeypatch.setattr(UserType, 'get_consultor_pk', classmethod(lambda cls: None))
+        person = Person.objects.create(name='Juan', last_name='Perez', dni='12345678')
+        person.delete()
+        view = PeopleViewSet()
+        view.request = SimpleNamespace(user=SimpleNamespace(tipo_usuario_id=None))
+        ids = [p.id for p in view.get_queryset()]
         assert person.id not in ids
+
+    def test_alumno_sin_acceso_people(self, student_client):
+        response = student_client.get(reverse(self.URL))
+        assert response.status_code == 403
 
     def test_delete_endpoint_is_soft_delete(self, admin_client, monkeypatch):
         from apps.actions.models import Action

@@ -13,6 +13,7 @@ from apps.users.models import CustomUser
 from datetime import datetime
 from django.db.models import Prefetch
 from apps.payment_method.models import PaymentMethod
+from apps.user_type.models import UserType
 from apps.user_type.permisos import IsAdministrador, IsConsultor, IsSuper
 
 class PeopleViewSet(viewsets.ModelViewSet):
@@ -21,7 +22,14 @@ class PeopleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdministrador | IsConsultor | IsSuper]
 
     def get_queryset(self):
-        return Person.all_objects.for_user(self.request.user).prefetch_related(
+        sees_deleted = {
+            UserType.get_super_pk(),
+            UserType.get_administrador_pk(),
+            UserType.get_consultor_pk(),
+        }
+        sees_deleted.discard(None)
+        manager = Person.all_objects if self.request.user.tipo_usuario_id in sees_deleted else Person.all_objects.alive()
+        return manager.prefetch_related(
             Prefetch(
                 'active_plans__plans_subtype__payment_methods',
                 queryset=PaymentMethod.objects.filter(deleted__isnull=True),
