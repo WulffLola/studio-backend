@@ -2,7 +2,7 @@
 
 API REST de **STUDIO**, una plataforma para la gestión operativa de estudios de Pilates. Centraliza en un solo sistema lo que en muchos estudios se maneja con planillas, cuadernos y mensajes sueltos: alumnos, planes, turnos, reservas, profesores, pagos y caja.
 
-La interfaz web está en [studio-frontend](https://github.com/WulffLola/studio-frontend).
+La interfaz web está en el proyecto `studio-frontend`.
 
 ## Funcionalidades
 
@@ -54,58 +54,136 @@ studio-backend/
 
 Cada app sigue la misma organización: `models.py`, `serializer.py`, `views.py`, `tests.py` y sus migraciones. La lógica de negocio que se reutiliza entre vistas está en `services.py`.
 
-## Instalación con Docker
+## Cómo levantarlo
 
-Requisitos: Docker y Docker Compose.
+### 1. Requisitos
+
+- **Docker Desktop** (Windows o Mac) o Docker Engine + Docker Compose (Linux). Se descarga de https://www.docker.com/products/docker-desktop/
+- Abrir Docker Desktop y esperar a que indique que está corriendo (*Engine running*) antes de seguir.
+- El puerto `8000` libre.
+
+No hace falta instalar Python ni PostgreSQL: todo corre dentro de los contenedores.
+
+### 2. Descomprimir
+
+Descomprimir `studio-backend.zip` y abrir una terminal dentro de la carpeta `studio-backend`.
+
+### 3. Levantar
 
 ```bash
-git clone https://github.com/WulffLola/studio-backend.git
-cd studio-backend/docker
-cp .env.example .env        # completar SECRET_KEY y, si hace falta, el resto
+cd docker
+cp .env.example .env
 docker compose up -d --build
 ```
 
-La API queda en `http://localhost:8000/`. El contenedor corre las migraciones al iniciar.
+En Windows con CMD se usa `copy .env.example .env` en lugar de `cp`.
 
-### Datos de prueba
+La primera vez tarda varios minutos porque descarga las imágenes e instala las dependencias. Al iniciar, el contenedor corre las migraciones.
+
+Para ver que terminó de arrancar:
+
+```bash
+docker compose logs -f studio_testing_backend
+```
+
+Cuando aparece `Starting development server at http://0.0.0.0:8000/`, se corta con `Ctrl+C` (los contenedores siguen corriendo).
+
+El backend espera a que la base de datos esté lista antes de arrancar, así que los primeros segundos puede no mostrar nada.
+
+### 4. Cargar los datos de prueba
 
 ```bash
 docker compose exec studio_testing_backend python manage.py seed_all
 ```
 
-Carga estudios, salas, planes, profesores, alumnos, turnos, reservas y pagos de ejemplo. Usuarios para entrar:
+Carga estudios, salas, actividades, planes y precios, profesores, alumnos, turnos, reservas, pagos y gastos de ejemplo. Usuarios para entrar (todos con la contraseña `studio1234`):
 
-| Usuario | Rol | Contraseña |
-|---|---|---|
-| `super@studio.local` | Super | `studio1234` |
-| `admin@studio.local` | Administrador | `studio1234` |
-| `recepcion@studio.local` | Consultor | `studio1234` |
+| Usuario | Rol |
+|---|---|
+| `super@studio.local` | Super |
+| `admin@studio.local` | Administrador |
+| `recepcion@studio.local` | Consultor |
 
-## Instalación sin Docker
+Los pagos y gastos de ejemplo se ubican en los últimos días (el más reciente, hoy en *Studio Central*), así la caja y las estadísticas muestran datos.
 
-Requisitos: Python 3.11 y PostgreSQL.
+El Consultor (recepción) puede dar de baja alumnos, pagos y gastos, pero tiene que ingresar su código personal de 4 dígitos: así queda registrado quién lo hizo en *Acciones*. El código del usuario de prueba `recepcion@studio.local` es `3444`.
+
+### 5. Probar
+
+La API queda en `http://localhost:8000/`. Para obtener un token:
+
+```bash
+curl -X POST http://localhost:8000/login/ -H "Content-Type: application/json" \
+  -d '{"identifier": "admin@studio.local", "password": "studio1234"}'
+```
+
+La respuesta trae `tokens.access`, que se manda en cada pedido como `Authorization: Bearer <token>`.
+
+Para usar la interfaz web, seguir los pasos del README de `studio-frontend`.
+
+### 6. Apagar
+
+```bash
+docker compose down
+```
+
+Los datos quedan guardados en la carpeta `data_local/`. Para empezar de cero, borrar esa carpeta y volver al paso 3.
+
+## Instalación sin Docker (opcional)
+
+Requisitos: Python 3.11 y PostgreSQL 13 o superior.
+
+1. Crear el usuario y la base (los valores son los de `docker/.env.example`). El usuario necesita `CREATEDB` para que los tests puedan crear su propia base:
+
+```bash
+psql -U postgres -c "CREATE USER studio WITH PASSWORD 'studio' CREATEDB;"
+psql -U postgres -c "CREATE DATABASE studio OWNER studio;"
+```
+
+2. Instalar las dependencias:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate        # en Windows: .venv\Scripts\activate
 pip install -r docker/requirements.txt
 ```
 
-Exportar las variables de `docker/.env.example` (con `POSTGRES_HOST=localhost`) y después:
+3. Cargar las variables de entorno. El proyecto las lee del entorno (no lee archivos `.env` solo), así que hay que cargarlas en la terminal antes de cada comando:
+
+```bash
+cp docker/.env.example .env.local
+# editar .env.local y cambiar POSTGRES_HOST=db por POSTGRES_HOST=localhost
+set -a; source .env.local; set +a
+```
+
+En Windows (PowerShell):
+
+```powershell
+Get-Content .env.local | ForEach-Object { if ($_ -match '^([^#=]+)=(.*)$') { Set-Item "env:$($matches[1])" $matches[2].Trim('"') } }
+```
+
+4. Preparar la base y levantar:
 
 ```bash
 cd studio
 python manage.py migrate
+python manage.py collectstatic --noinput   # necesario si DEBUG=false (estilos de Swagger y Redoc)
 python manage.py seed_all
 python manage.py runserver
 ```
 
 ## Tests
 
+Con los contenedores levantados:
+
 ```bash
-cd studio
-pytest
+cd docker
+docker compose exec studio_testing_backend pytest
 ```
+
+Sin Docker: `cd studio && pytest` (con las variables de entorno cargadas).
+
+Tarda unos 2 o 3 minutos. La salida es larga porque `pytest.ini` ya trae `-v`; con `pytest -q` se ve solo el resumen.
 
 Para correr los de un módulo: `pytest apps/appointments`.
 
@@ -125,7 +203,7 @@ Todas están en [`docker/.env.example`](docker/.env.example). Las principales:
 
 ## Documentación de la API
 
-Con el servidor levantado, la referencia de todos los endpoints está en `/doc&test/` (Swagger) y `/snippets/` (Redoc). En [`docs/`](docs/README.md) están las convenciones generales de la API.
+La referencia de todos los endpoints está en `/doc&test/` (Swagger) y `/snippets/` (Redoc), y solo la puede ver el usuario Super: primero hay que iniciar sesión en `http://localhost:8000/api-auth/login/` con `super@studio.local` / `studio1234` y después abrir `http://localhost:8000/doc&test/`. En [`docs/`](docs/README.md) están las convenciones generales de la API.
 
 ## Tareas programadas
 
