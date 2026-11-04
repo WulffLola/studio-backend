@@ -6,9 +6,6 @@ La API de STUDIO es REST y está hecha con Django REST Framework. Todas las resp
 
 1. [Autenticación y usuarios](01-autenticacion-y-usuarios.md)
 2. [Alumnos, planes y actividades](02-alumnos-planes-actividades.md)
-3. [Turnos, reservas y profesores](03-turnos-reservas-profesores.md)
-4. [Pagos, gastos y caja](04-pagos-gastos-caja.md)
-5. [Estadísticas y módulos de contenido](05-estadisticas-y-contenido.md)
 
 ## Convenciones
 
@@ -59,7 +56,7 @@ Los registros no se borran de la base: al eliminarlos se completa el campo `dele
 
 ### Código de operador
 
-Las operaciones sensibles (alta, edición y baja de alumnos, pagos, gastos y reservas hechas desde recepción) piden un campo `code` en el body. Es el código personal de quien hace la operación y queda guardado en el [registro de acciones](05-estadisticas-y-contenido.md#registro-de-acciones). Si el código no existe la API responde `400`.
+Las operaciones sensibles (alta, edición y baja de alumnos, pagos, gastos y reservas hechas desde recepción) piden un campo `code` en el body. Es el código personal de quien hace la operación y queda guardado en el registro de acciones (`/actions/`). Si el código no existe la API responde `400`.
 
 ### Filtro por estudio
 
