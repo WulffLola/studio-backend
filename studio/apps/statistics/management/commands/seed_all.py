@@ -20,7 +20,6 @@ FIXTURES = [
     'data_seed/002_users.seed.json',
     'data_seed/003_activity_type.seed.json',
     'data_seed/004_expense_type.seed.json',
-    'data_seed/007_plans_seed.json',
     'data_seed/008_plans_type.seed.json',
     'data_seed/009_recipes.seed.json',
     'data_seed/010_status.seed.json',
@@ -29,9 +28,9 @@ FIXTURES = [
     'data_seed/013_teachers.seed.json',
     'data_seed/014_weeks.seed.json',
     'data_seed/015_activity_subtype.seed.json',
-    'data_seed/017_payment_method.seed.json',
     'data_seed/018_people.seed.json',
     'data_seed/019_plans_subtype.seed.json',
+    'data_seed/017_payment_method.seed.json',
     'data_seed/020_room.seed.json',
     'data_seed/005_holidays.seed.json',
     'data_seed/006_notes.seed.json',
@@ -77,6 +76,9 @@ class Command(BaseCommand):
         if not options['skip_commands']:
             self._run_seed_commands()
 
+        if not options['skip_fixtures']:
+            self._shift_dates()
+
         self.stdout.write(self.style.SUCCESS('\n✓ Base de datos poblada correctamente.'))
 
     def _load_fixtures(self):
@@ -96,3 +98,35 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f'  ✓ {command}'))
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f'  ✗ {command}: {e}'))
+
+    def _shift_dates(self):
+        """Corre las fechas de los pagos, gastos y planes de ejemplo para que
+        queden cerca de hoy. Los fixtures tienen fechas fijas (2024/2026) y sin
+        esto la caja y las estadísticas de finanzas se ven vacías."""
+        from datetime import timedelta
+        from django.db.models import Max
+        from django.utils import timezone
+        from apps.payments.models import Payment
+        from apps.expenses.models import Expense
+        from apps.people.models import PersonActivePlan
+
+        self.stdout.write(self.style.HTTP_INFO('\n── Ajustando fechas a hoy ─────────────'))
+        try:
+            now = timezone.now()
+            # Un pago y un gasto por día hacia atrás desde hoy, empezando por
+            # Studio Central (el estudio completo), así la caja de hoy tiene movimientos.
+            base = now - timedelta(minutes=1)
+            for model in (Payment, Expense):
+                objs = sorted(model.all_objects.all(), key=lambda o: (o.studio_id or 0, o.pk))
+                for i, obj in enumerate(objs):
+                    model.all_objects.filter(pk=obj.pk).update(date=base - timedelta(days=i))
+
+            # planes activos: el que vence más tarde queda a 30 días de hoy
+            last_exp = PersonActivePlan.all_objects.aggregate(m=Max('exp_date'))['m']
+            if last_exp:
+                plan_delta = (now.date() + timedelta(days=30)) - last_exp
+                for ap in PersonActivePlan.all_objects.all():
+                    PersonActivePlan.all_objects.filter(pk=ap.pk).update(exp_date=ap.exp_date + plan_delta)
+            self.stdout.write(self.style.SUCCESS('  ✓ pagos, gastos y planes con fechas recientes'))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'  ✗ ajuste de fechas: {e}'))

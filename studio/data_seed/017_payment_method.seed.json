@@ -3,9 +3,9 @@
         "model": "payment_method.paymentmethod",
         "pk": 1,
         "fields": {
-            "amount": "15000",
-            "method": "Transferencia",
-            "plan": 2,
+            "amount": "25000",
+            "method": "Efectivo",
+            "plans_subtype": 1,
             "deleted": null
         }
     },
@@ -13,9 +13,9 @@
         "model": "payment_method.paymentmethod",
         "pk": 2,
         "fields": {
-            "amount": "5000",
-            "method": "Efectivo",
-            "plan": 1,
+            "amount": "28000",
+            "method": "Transferencia",
+            "plans_subtype": 1,
             "deleted": null
         }
     },
@@ -24,8 +24,8 @@
         "pk": 3,
         "fields": {
             "amount": "25000",
-            "method": "Tarjeta Crédito",
-            "plan": 3,
+            "method": "Efectivo",
+            "plans_subtype": 2,
             "deleted": null
         }
     },
@@ -33,9 +33,9 @@
         "model": "payment_method.paymentmethod",
         "pk": 4,
         "fields": {
-            "amount": "12000",
-            "method": "Mercado Pago",
-            "plan": 2,
+            "amount": "28000",
+            "method": "Transferencia",
+            "plans_subtype": 2,
             "deleted": null
         }
     },
@@ -43,9 +43,59 @@
         "model": "payment_method.paymentmethod",
         "pk": 5,
         "fields": {
+            "amount": "30000",
+            "method": "Efectivo",
+            "plans_subtype": 3,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 6,
+        "fields": {
+            "amount": "33000",
+            "method": "Transferencia",
+            "plans_subtype": 3,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 7,
+        "fields": {
             "amount": "20000",
-            "method": "Débito",
-            "plan": 4,
+            "method": "Efectivo",
+            "plans_subtype": 4,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 8,
+        "fields": {
+            "amount": "22000",
+            "method": "Transferencia",
+            "plans_subtype": 4,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 9,
+        "fields": {
+            "amount": "18000",
+            "method": "Efectivo",
+            "plans_subtype": 5,
+            "deleted": null
+        }
+    },
+    {
+        "model": "payment_method.paymentmethod",
+        "pk": 10,
+        "fields": {
+            "amount": "20000",
+            "method": "Transferencia",
+            "plans_subtype": 5,
             "deleted": null
         }
     }
