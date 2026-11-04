@@ -14,3 +14,9 @@ class HomePhraseViewSet(StudentReadMixin, viewsets.ModelViewSet):
     queryset = HomePhrase.objects.all()
     serializer_class = HomePhraseSerializer
     write_permission = IsAdministrador | IsSuper
+
+    def get_permissions(self):
+        # La frase del inicio es pública: la ven todos los roles (y la app de alumnos).
+        if self.action in ('list', 'retrieve'):
+            return [AllowAny()]
+        return super().get_permissions()
