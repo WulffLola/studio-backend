@@ -243,6 +243,14 @@ AUTH_ACTIVITY_HEADER_REQUIRED = os.environ.get("AUTH_ACTIVITY_HEADER_REQUIRED", 
 # obtener la IP real del cliente desde X-Forwarded-For.
 AUTH_PROXY_COUNT = int(os.environ.get("AUTH_PROXY_COUNT", "1"))
 
+# Bloqueo de autenticación (apps.users.lockout)
+AUTH_LOCKOUT_MAX_FAILURES = 5
+AUTH_LOCKOUT_WINDOW = timedelta(minutes=15)
+AUTH_LOCKOUT_DURATION = timedelta(minutes=15)
+AUTH_IP_MAX_FAILURES = 20      # fallos por IP en la ventana (todas las cuentas)
+AUTH_IP_MAX_REQUESTS = 30      # registro / recuperación: peticiones por IP en la ventana
+AUTHENTICATION_BACKENDS = ["apps.users.backends.LockoutModelBackend"]
+
 from corsheaders.defaults import default_headers as _cors_default_headers  # noqa: E402
 CORS_ALLOW_HEADERS = (*_cors_default_headers, "x-client-idle")
 

@@ -156,19 +156,31 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
+        from django.contrib.auth.hashers import make_password
+        from . import lockout
+
         identifier = data["identifier"]
         password = data["password"]
+        request = self.context.get("request")
+
+        # Bloqueo temporal por cuenta (email y DNI comparten contador) y por IP.
+        key = lockout.account_key(identifier)
+        lockout.check(request, key)
 
         try:
             user = CustomUser.objects.get(
-                Q(email__iexact=identifier) | Q(dni=identifier),
+                Q(email__iexact=identifier.strip()) | Q(dni=identifier.strip()),
                 deleted__isnull=True,
                 is_active=True,
             )
-        except CustomUser.DoesNotExist:
+        except (CustomUser.DoesNotExist, CustomUser.MultipleObjectsReturned):
+            make_password(password)  # tiempo similar al caso "existe": no revela cuentas
+            lockout.register_failure(request, key)
             raise serializers.ValidationError("Credenciales incorrectas")
 
         if not user.check_password(password):
+            lockout.register_failure(request, key)
             raise serializers.ValidationError("Credenciales incorrectas")
 
+        lockout.register_success(key)
         return user

@@ -26,6 +26,7 @@ import logging
 
 from .email_service import send_verification_email, send_password_reset_email
 from .sessions import issue_tokens
+from . import lockout
 
 logger = logging.getLogger(__name__)
 
@@ -343,7 +344,7 @@ class UserLoginViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request):
-        serializer = serializers.UserLoginSerializer(data=request.data)
+        serializer = serializers.UserLoginSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         user = serializer.validated_data
@@ -379,7 +380,7 @@ class StudentLoginViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request):
-        serializer = serializers.UserLoginSerializer(data=request.data)
+        serializer = serializers.UserLoginSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         user = serializer.validated_data
@@ -446,6 +447,7 @@ class CheckDniView(viewsets.ViewSet):
     def create(self, request, *args, **kwargs):
         from apps.people.models import Person
 
+        lockout.count_request(request)  # limita la enumeración por IP
         serializer = CheckDniSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         dni = serializer.validated_data['dni']
@@ -546,6 +548,7 @@ class RegisterView(viewsets.ViewSet):
     def create(self, request, *args, **kwargs):
         from apps.people.models import Person
 
+        lockout.count_request(request)
         dni = request.data.get('dni', '').strip()
         email = request.data.get('email', '').strip()
 
@@ -670,6 +673,7 @@ class VerifyEmailView(viewsets.ViewSet):
 
     def create(self, request, *args, **kwargs):
         token_str = request.data.get('token')
+        lockout.check(request)
         if not token_str:
             return Response(
                 {"detail": "Se requiere el campo 'token'."},
@@ -683,11 +687,13 @@ class VerifyEmailView(viewsets.ViewSet):
                 max_age=86400,  # 24 horas
             )
         except signing.SignatureExpired:
+            lockout.register_failure(request)
             return Response(
                 {"detail": "El token de verificación expiró. Solicitá uno nuevo."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except signing.BadSignature:
+            lockout.register_failure(request)
             return Response(
                 {"detail": "Token inválido."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -736,6 +742,7 @@ class PasswordResetView(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        lockout.count_request(request)
         serializer = PasswordResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']

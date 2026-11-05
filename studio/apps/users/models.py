@@ -97,3 +97,27 @@ class AuthSession(models.Model):
 
     def __str__(self):
         return f"AuthSession({self.user_id}, {self.created_at:%Y-%m-%d %H:%M})"
+
+
+class AuthFailure(models.Model):
+    """Intento de autenticación fallido (para el bloqueo temporal).
+
+    scope='account': clave = usuario resuelto (email y DNI comparten contador) o
+    hash del identificador si no existe la cuenta. scope='ip': IP del cliente.
+    scope='ip_req': peticiones a endpoints públicos sensibles (registro, recuperación).
+    """
+    scope = models.CharField(max_length=10)
+    key = models.CharField(max_length=80)
+    created_at = models.DateTimeField(db_index=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["scope", "key", "created_at"])]
+
+
+class AuthLock(models.Model):
+    scope = models.CharField(max_length=10)
+    key = models.CharField(max_length=80)
+    locked_until = models.DateTimeField()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["scope", "key"], name="authlock_scope_key_unique")]
