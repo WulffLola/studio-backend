@@ -2,7 +2,6 @@ from rest_framework import status, viewsets, views
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -26,6 +25,7 @@ from django.core import signing
 import logging
 
 from .email_service import send_verification_email, send_password_reset_email
+from .sessions import issue_tokens
 
 logger = logging.getLogger(__name__)
 
@@ -182,14 +182,10 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             # Usuarios creados por admin/super quedan activos directamente
             user = serializer.save(is_active=True)
-
-            token = RefreshToken.for_user(user)
-            response_data = serializer.data
-            response_data["tokens"] = {
-                "refresh": str(token),
-                "access": str(token.access_token),
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
+            # Seguridad: el alta administrativa ya no emite tokens del usuario
+            # creado (abría una sesión ajena desde la cuenta del admin; el
+            # frontend no los usaba).
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except IntegrityError as e:
             if "email" in str(e):
@@ -352,7 +348,7 @@ class UserLoginViewSet(viewsets.ViewSet):
 
         user = serializer.validated_data
 
-        token = RefreshToken.for_user(user)
+        tokens, _session = issue_tokens(user, request)
 
         request = self.request
         profile_photo_url = None
@@ -368,10 +364,7 @@ class UserLoginViewSet(viewsets.ViewSet):
             "code": user.code,
             "profile_photo": profile_photo_url,
             "tipo": user.tipo_usuario.user_type_name if user.tipo_usuario else None,
-            "tokens": {
-                "refresh": str(token),
-                "access": str(token.access_token),
-            },
+            "tokens": tokens,
         }
 
         return Response(data, status=status.HTTP_200_OK)
@@ -397,7 +390,7 @@ class StudentLoginViewSet(viewsets.ViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        token = RefreshToken.for_user(user)
+        tokens, _session = issue_tokens(user, request)
         profile_photo_url = None
         if user.profile_photo:
             profile_photo_url = request.build_absolute_uri(user.profile_photo.url)
@@ -411,28 +404,13 @@ class StudentLoginViewSet(viewsets.ViewSet):
             "person_id": user.person_id,
             "profile_photo": profile_photo_url,
             "tipo": user.tipo_usuario.user_type_name if user.tipo_usuario else None,
-            "tokens": {
-                "refresh": str(token),
-                "access": str(token.access_token),
-            },
+            "tokens": tokens,
         }, status=status.HTTP_200_OK)
 
 
-class UserLogoutViewSet(views.APIView):
-    """
-    An endpoint to logout users.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        if self.request.data.get('all'):
-            for token in OutstandingToken.objects.filter(user=request.user):
-                _, _ = BlacklistedToken.objects.get_or_create(token=token)
-            return Response({"status": "OK, goodbye, all refresh tokens blacklisted"})
-        refresh_token = self.request.data.get('refresh_token')
-        token = RefreshToken(token=refresh_token)
-        token.blacklist()
-        return Response({"status": "OK, goodbye"})
+# El logout vive en apps.users.auth_views.LogoutView (revoca la sesión además
+# de poner el refresh en la blacklist). Se mantiene el nombre por compatibilidad.
+from .auth_views import LogoutView as UserLogoutViewSet  # noqa: E402
 
 
 # Helpers de envío externo
@@ -729,7 +707,7 @@ class VerifyEmailView(viewsets.ViewSet):
         user.is_active = True
         user.save(update_fields=['is_active'])
 
-        jwt_token = RefreshToken.for_user(user)
+        tokens, _session = issue_tokens(user, request)
         return Response(
             {
                 "detail": "Cuenta verificada exitosamente.",
@@ -740,10 +718,7 @@ class VerifyEmailView(viewsets.ViewSet):
                     "last_name": user.last_name,
                     "dni": user.dni,
                 },
-                "tokens": {
-                    "refresh": str(jwt_token),
-                    "access": str(jwt_token.access_token),
-                },
+                "tokens": tokens,
             },
             status=status.HTTP_200_OK,
         )

@@ -4,6 +4,7 @@ from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
 from apps.user_type.models import UserType
 from django.utils.timezone import now
+import uuid
 
 from .managers import CustomUserManager, AllUsersManager  # 👈 importa los nuevos managers
 
@@ -26,6 +27,9 @@ class CustomUser(AbstractUser):
     profile_photo = models.ImageField(upload_to='users/photos/', null=True, blank=True)
     is_student = models.BooleanField(default=False)
     deleted = models.DateTimeField(null=True, blank=True)
+    # Seguridad: se incrementa para revocar de inmediato todos los tokens emitidos
+    # (cambio/recuperación de contraseña, "cerrar todas las sesiones").
+    token_version = models.PositiveIntegerField(default=0)
 
     @property
     def is_student_user(self):
@@ -69,3 +73,27 @@ class CustomUser(AbstractUser):
     def restore(self):
         self.deleted = None
         self.save(update_fields=['deleted'])
+
+
+class AuthSession(models.Model):
+    """Sesión de autenticación JWT del lado servidor.
+
+    Cada login crea una fila; los tokens llevan su id en el claim ``sid``. El
+    backend rechaza cualquier access/refresh cuya sesión esté revocada, haya
+    superado el máximo absoluto (8 h) o lleve más de 30 min sin actividad real.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="auth_sessions")
+    created_at = models.DateTimeField()
+    last_activity_at = models.DateTimeField()
+    expires_at = models.DateTimeField()
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoke_reason = models.CharField(max_length=30, blank=True, default="")
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=255, blank=True, default="")
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "revoked_at"])]
+
+    def __str__(self):
+        return f"AuthSession({self.user_id}, {self.created_at:%Y-%m-%d %H:%M})"

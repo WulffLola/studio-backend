@@ -10,6 +10,8 @@ EXPECTED_PUBLIC = {
     "UserLoginViewSet", "StudentLoginViewSet", "CheckDniView", "RegisterView",
     "VerifyEmailView", "PasswordResetView", "PasswordResetConfirmView",
     "PricesViewSet", "AvailablePlansViewSet",
+    # Identifican la sesión por el token del body:
+    "TokenObtainView", "SessionTokenRefreshView", "LogoutView",
 }
 
 
@@ -34,14 +36,12 @@ def _drf_views():
 
 
 def test_only_expected_views_are_public():
-    """Ninguna vista queda pública por omisión: las AllowAny son exactamente las esperadas
-    (más TokenObtainPairView/TokenRefreshView, que se evalúan en el bloque de sesiones)."""
+    """Ninguna vista queda pública por omisión: las AllowAny son exactamente las esperadas."""
     public = set()
     for name, cls in _drf_views().items():
         perms = getattr(cls, "permission_classes", [])
         if any(p is AllowAny for p in perms):
             public.add(name)
-    public -= {"TokenObtainPairView", "TokenRefreshView", "TokenObtainPairSessionView", "SessionTokenRefreshView", "UserLogoutViewSet"}
     assert public == EXPECTED_PUBLIC
 
 

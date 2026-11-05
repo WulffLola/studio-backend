@@ -1505,9 +1505,12 @@ class TestTokenExpirationKAN247:
         assert resp.status_code == 401
 
     def test_token_valido_autentica(self):
-        from rest_framework_simplejwt.tokens import AccessToken
+        # Desde el bloque de sesiones, un access válido debe estar ligado a una
+        # AuthSession (claim sid); los emitidos "sueltos" se rechazan (ver
+        # tests_security/test_sessions.py::test_legacy_token_without_session_rejected).
+        from apps.users.sessions import issue_tokens
         user = self._user(dni='70010002', email='tok2@test.com')
-        token = AccessToken.for_user(user)
+        token = issue_tokens(user)[0]['access']
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         resp = client.get(reverse('people-list'))

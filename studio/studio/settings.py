@@ -187,7 +187,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # JWT + validación de la sesión del lado servidor (8 h / 30 min / revocación)
+        "apps.users.authentication.SessionJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
     # Seguridad: todo endpoint exige autenticación salvo que declare
@@ -198,11 +199,12 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),   # antes 365 días (no vencía)
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=14),   # antes 400 días
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
+    # El refresh nunca supera el máximo absoluto de la sesión (AUTH_SESSION_MAX_AGE).
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=8),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
-    "UPDATE_LAST_LOGIN": False,
+    "UPDATE_LAST_LOGIN": False,  # lo hace apps.users.sessions.issue_tokens
 
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
@@ -228,6 +230,21 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 
+
+# ==============================
+# Seguridad de sesiones
+# ==============================
+AUTH_SESSION_MAX_AGE = timedelta(hours=8)        # máximo absoluto desde el login
+AUTH_SESSION_IDLE_TIMEOUT = timedelta(minutes=30)  # sin actividad real del usuario
+# True: solo cuentan como actividad las peticiones que informan X-Client-Idle
+# (recomendado cuando todos los clientes de la API lo envíen).
+AUTH_ACTIVITY_HEADER_REQUIRED = os.environ.get("AUTH_ACTIVITY_HEADER_REQUIRED", "false").lower() in ("1", "true", "yes")
+# Proxies de confianza delante de Django (nginx del repo = 1). Se usa para
+# obtener la IP real del cliente desde X-Forwarded-For.
+AUTH_PROXY_COUNT = int(os.environ.get("AUTH_PROXY_COUNT", "1"))
+
+from corsheaders.defaults import default_headers as _cors_default_headers  # noqa: E402
+CORS_ALLOW_HEADERS = (*_cors_default_headers, "x-client-idle")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
