@@ -20,10 +20,20 @@ class PaymentSerializer(serializers.ModelSerializer):
     person_id = serializers.PrimaryKeyRelatedField(queryset=Person.objects.all(), source='person', write_only=True)
     person = PersonSerializer(read_only=True)
     items = PaymentItemInlineSerializer(many=True, read_only=True)
+    # El comprobante nunca se expone por una URL pública: se informa la ruta de
+    # descarga autenticada (null si no hay). Solo lectura: lo genera el backend.
+    pdf_file = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
         fields = '__all__'
+
+    def get_pdf_file(self, instance):
+        if not instance.pdf_file:
+            return None
+        request = self.context.get("request")
+        path = f"/payments/{instance.pk}/download_pdf/"
+        return request.build_absolute_uri(path) if request else path
 
     def validate_date(self, value):
         input_date = self.initial_data.get('date')

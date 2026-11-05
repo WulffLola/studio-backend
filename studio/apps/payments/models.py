@@ -3,6 +3,7 @@ from decimal import Decimal
 from apps.users.models import CustomUser
 from apps.people.models import Person
 from utils import DeletedManager, DeletedQuerySet, SoftDeleteMixin
+from .storage import receipt_storage
 
 
 class Payment(SoftDeleteMixin):
@@ -15,7 +16,8 @@ class Payment(SoftDeleteMixin):
     observation = models.CharField(max_length=100, null=True, blank=True)
     studio = models.ForeignKey('studios.Studio', on_delete=models.PROTECT, related_name='payments')
     deleted = models.DateField(null=True, blank=True)
-    pdf_file = models.FileField(upload_to='payments/', null=True, blank=True)
+    # Comprobante: ver apps/payments/storage.py (privado si PRIVATE_MEDIA_ROOT está definido).
+    pdf_file = models.FileField(upload_to='payments/', storage=receipt_storage, null=True, blank=True)
 
     objects = DeletedManager()                  # solo no eliminados (default)
     all_objects = DeletedQuerySet.as_manager()  # todos, con .alive() y .dead()

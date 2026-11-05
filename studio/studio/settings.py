@@ -243,6 +243,11 @@ AUTH_ACTIVITY_HEADER_REQUIRED = os.environ.get("AUTH_ACTIVITY_HEADER_REQUIRED", 
 # obtener la IP real del cliente desde X-Forwarded-For.
 AUTH_PROXY_COUNT = int(os.environ.get("AUTH_PROXY_COUNT", "1"))
 
+# Comprobantes de pago privados (apps/payments/storage.py). Vacío = modo legado
+# (MEDIA_ROOT/payments, servido por nginx). Para activarlo hace falta un volumen
+# persistente para esta ruta en el despliegue.
+PRIVATE_MEDIA_ROOT = os.environ.get("PRIVATE_MEDIA_ROOT", "")
+
 # Bloqueo de autenticación (apps.users.lockout)
 AUTH_LOCKOUT_MAX_FAILURES = 5
 AUTH_LOCKOUT_WINDOW = timedelta(minutes=15)
