@@ -146,7 +146,8 @@ class TestRegisterViewNew:
         response = client.post(reverse(self.URL), data={
             'dni': '11112222',
             'email': 'minimal@test.com',
-            'password': 'pass123',
+            # 'pass123' ya no cumple AUTH_PASSWORD_VALIDATORS (mín. 8); ver tests_security/test_passwords.py
+            'password': 'Pilates-2026',
             'name': 'Maria',
             'last_name': 'Garcia',
         }, content_type='application/json')
@@ -289,14 +290,18 @@ class TestPasswordResetConfirmView:
         return user
 
     def test_valid_token_resets_password(self, client, active_user):
-        token = signing.dumps(active_user.pk, salt='password-reset')
+        # Token de un solo uso (formato nuevo); el formato anterior se rechaza.
+        from apps.users.views import make_password_reset_token
+        token = make_password_reset_token(active_user)
         response = client.post(reverse(self.URL), data={'token': token, 'password': 'newpass456'}, content_type='application/json')
         assert response.status_code == 200
         active_user.refresh_from_db()
         assert active_user.check_password('newpass456')
 
     def test_old_password_no_longer_works(self, client, active_user):
-        token = signing.dumps(active_user.pk, salt='password-reset')
+        # Token de un solo uso (formato nuevo); el formato anterior se rechaza.
+        from apps.users.views import make_password_reset_token
+        token = make_password_reset_token(active_user)
         client.post(reverse(self.URL), data={'token': token, 'password': 'newpass456'}, content_type='application/json')
         active_user.refresh_from_db()
         assert not active_user.check_password('oldpass123')
@@ -315,7 +320,8 @@ class TestPasswordResetConfirmView:
         assert response.status_code == 400
 
     def test_password_too_short_returns_400(self, client, active_user):
-        token = signing.dumps(active_user.pk, salt='password-reset')
+        from apps.users.views import make_password_reset_token
+        token = make_password_reset_token(active_user)
         response = client.post(reverse(self.URL), data={'token': token, 'password': '123'}, content_type='application/json')
         assert response.status_code == 400
 

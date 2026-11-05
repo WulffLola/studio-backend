@@ -27,6 +27,7 @@ import logging
 from .email_service import send_verification_email, send_password_reset_email
 from .sessions import issue_tokens
 from . import lockout
+from .passwords import change_password, validate_new_password
 
 logger = logging.getLogger(__name__)
 
@@ -173,8 +174,13 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
-        # 🔐 Encriptar password
+        # 🔐 Validar (AUTH_PASSWORD_VALIDATORS) y encriptar password
         if "password" in data:
+            candidate = CustomUser(
+                email=data.get("email", ""), name=data.get("name", ""),
+                last_name=data.get("last_name", ""), dni=data.get("dni", ""),
+            )
+            validate_new_password(data["password"], candidate)
             data["password"] = make_password(data["password"])
 
         serializer = self.get_serializer(data=data)
@@ -247,7 +253,7 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
                 # Defensa en profundidad: get_queryset ya restringe a la fila propia (404 antes); esto cubre cambios futuros.
                 return Response({"detail": "No tienes permisos para actualizar este usuario."},
                                 status=status.HTTP_403_FORBIDDEN)
-            ALLOWED_STUDENT_FIELDS = {'name', 'last_name', 'phone', 'birth_date', 'sex', 'email', 'password'}
+            ALLOWED_STUDENT_FIELDS = {'name', 'last_name', 'phone', 'birth_date', 'sex', 'email', 'password', 'current_password'}
             # Campos fuera de la whitelist (tipo_usuario, deleted, is_student, is_*): 403.
             forbidden = set(data.keys()) - ALLOWED_STUDENT_FIELDS
             if forbidden:
@@ -257,9 +263,11 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
                 )
             if "password" in data:
                 if data["password"]:
-                    instance.set_password(data["password"])
-                    instance.save()
+                    error = change_password(request, instance, data["password"])
+                    if error is not None:
+                        return error
                 data.pop("password", None)
+            data.pop("current_password", None)
             serializer = self.get_serializer(instance, data=data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -277,9 +285,11 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
         # Manejo del campo 'password'
         if "password" in data:
             if data["password"]:
-                instance.set_password(data["password"])
-                instance.save()
+                error = change_password(request, instance, data["password"])
+                if error is not None:
+                    return error
             data.pop("password", None)
+        data.pop("current_password", None)
 
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -736,8 +746,13 @@ class PasswordResetView(viewsets.ViewSet):
     """
     POST /password-reset/
     Body: {email}
-    Genera un token firmado (TTL 1 h) y llama a API_EMAIL_RESET.
-    Siempre responde 200 para no revelar si el email existe.
+    Genera un token firmado de UN SOLO USO (TTL: PASSWORD_RESET_TIMEOUT = 1 h) y
+    envía el email. Siempre responde 200 para no revelar si el email existe.
+
+    El token sigue siendo un único string opaco (mismo contrato que antes para
+    la pantalla /reset-password?token=...): firma de {u: pk, t: token de
+    default_token_generator}. El token de Django depende del hash de la
+    contraseña y del último login, así que deja de servir apenas se restablece.
     """
     permission_classes = [AllowAny]
 
@@ -749,7 +764,7 @@ class PasswordResetView(viewsets.ViewSet):
 
         user = CustomUser.objects.filter(email__iexact=email, is_active=True).first()
         if user:
-            token_str = signing.dumps(user.pk, salt='password-reset')
+            token_str = make_password_reset_token(user)
             send_password_reset_email(email, user.name, token_str)
 
         return Response(
@@ -758,43 +773,61 @@ class PasswordResetView(viewsets.ViewSet):
         )
 
 
+def make_password_reset_token(user):
+    from django.contrib.auth.tokens import default_token_generator
+    return signing.dumps({"u": user.pk, "t": default_token_generator.make_token(user)}, salt='password-reset')
+
+
 class PasswordResetConfirmView(viewsets.ViewSet):
     """
     POST /password-reset/confirm/
     Body: {token, password}
-    Valida el token (TTL 1 h) y establece la nueva contraseña.
+    Valida el token (1 h, un solo uso), aplica los validadores de contraseña,
+    establece la nueva contraseña, revoca todas las sesiones del usuario y
+    quita el bloqueo temporal de la cuenta.
     """
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        from django.conf import settings as dj_settings
+        from django.contrib.auth.tokens import default_token_generator
+        from .sessions import revoke_all_sessions
+
+        lockout.check(request)
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         token_str = serializer.validated_data['token']
         new_password = serializer.validated_data['password']
 
+        invalid = Response({"detail": "Token inválido."}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user_pk = signing.loads(token_str, salt='password-reset', max_age=3600)
+            payload = signing.loads(token_str, salt='password-reset',
+                                    max_age=getattr(dj_settings, "PASSWORD_RESET_TIMEOUT", 3600))
         except signing.SignatureExpired:
+            lockout.register_failure(request)
             return Response(
                 {"detail": "El enlace de recuperación expiró. Solicitá uno nuevo."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except signing.BadSignature:
-            return Response(
-                {"detail": "Token inválido."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            lockout.register_failure(request)
+            return invalid
 
-        try:
-            user = CustomUser.objects.get(pk=user_pk, is_active=True)
-        except CustomUser.DoesNotExist:
-            return Response(
-                {"detail": "Usuario no encontrado o inactivo."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if not isinstance(payload, dict) or "u" not in payload or "t" not in payload:
+            # Formato anterior (solo el pk, reutilizable): ya no se acepta.
+            lockout.register_failure(request)
+            return invalid
 
+        user = CustomUser.objects.filter(pk=payload["u"], is_active=True).first()
+        if user is None or not default_token_generator.check_token(user, str(payload["t"])):
+            lockout.register_failure(request)
+            return invalid
+
+        validate_new_password(new_password, user)
         user.set_password(new_password)
         user.save(update_fields=['password'])
+        revoke_all_sessions(user, "password_reset")
+        lockout.clear_account(user)
 
         return Response(
             {"detail": "Contraseña restablecida exitosamente."},

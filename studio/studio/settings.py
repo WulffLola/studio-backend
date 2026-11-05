@@ -249,6 +249,7 @@ AUTH_LOCKOUT_WINDOW = timedelta(minutes=15)
 AUTH_LOCKOUT_DURATION = timedelta(minutes=15)
 AUTH_IP_MAX_FAILURES = 20      # fallos por IP en la ventana (todas las cuentas)
 AUTH_IP_MAX_REQUESTS = 30      # registro / recuperación: peticiones por IP en la ventana
+PASSWORD_RESET_TIMEOUT = 3600  # 1 h, enlaces de recuperación de un solo uso
 AUTHENTICATION_BACKENDS = ["apps.users.backends.LockoutModelBackend"]
 
 from corsheaders.defaults import default_headers as _cors_default_headers  # noqa: E402
