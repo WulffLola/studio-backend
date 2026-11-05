@@ -13,9 +13,11 @@ con los segundos transcurridos desde la última interacción del usuario
 (teclado, mouse, toque). El backend toma como última actividad
 ``ahora - X-Client-Idle``, así que el polling o las peticiones automáticas de una
 pestaña inactiva no extienden la sesión. El refresh nunca cuenta como actividad.
-Clientes que no envían el header (p. ej. otra app que consuma la API) cuentan
-cada petición como actividad, salvo que AUTH_ACTIVITY_HEADER_REQUIRED=True.
+Las peticiones sin el header (requests manuales, polling, otros clientes) NO
+cuentan como actividad (AUTH_ACTIVITY_HEADER_REQUIRED=True por defecto).
+La caducidad siempre la decide el servidor con su propio last_activity_at.
 """
+import math
 from datetime import datetime, timedelta, timezone as dt_timezone
 
 from django.conf import settings
@@ -31,6 +33,8 @@ ACTIVITY_HEADER = "HTTP_X_CLIENT_IDLE"
 # Para no escribir en la DB en cada request: solo se actualiza la última
 # actividad si avanzó al menos esto.
 ACTIVITY_WRITE_GRANULARITY = timedelta(seconds=30)
+# Un idle mayor ya implica sesión vencida; valores más grandes se descartan.
+MAX_REPORTED_IDLE_SECONDS = 24 * 3600
 
 
 def max_age():
@@ -146,18 +150,26 @@ def validate_session(payload, user):
 
 def reported_activity_at(request, now=None):
     """Momento de la última actividad real informada por el cliente, o None si
-    la petición no debe contar como actividad."""
+    la petición no debe contar como actividad.
+
+    El valor del cliente nunca decide por sí solo: la caducidad la controla
+    validate_session() con el last_activity_at guardado en el servidor ANTES de
+    mirar este header, y el header solo puede mover la actividad hacia adelante
+    hasta "ahora" (nunca al futuro). Sin header válido no hay crédito de
+    actividad (polling, requests manuales, refresh).
+    """
     now = now or timezone.now()
     raw = request.META.get(ACTIVITY_HEADER)
-    if raw is None or raw == "":
-        if getattr(settings, "AUTH_ACTIVITY_HEADER_REQUIRED", False):
+    if raw is None or str(raw).strip() == "":
+        if getattr(settings, "AUTH_ACTIVITY_HEADER_REQUIRED", True):
             return None
         return now
     try:
         idle = float(raw)
     except (TypeError, ValueError):
         return None
-    if idle < 0 or idle != idle:  # negativo o NaN
+    # negativo, NaN, infinito o absurdo -> no cuenta (y nunca provoca un 500)
+    if not math.isfinite(idle) or idle < 0 or idle > MAX_REPORTED_IDLE_SECONDS:
         return None
     return now - timedelta(seconds=idle)
 

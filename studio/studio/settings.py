@@ -189,7 +189,8 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         # JWT + validación de la sesión del lado servidor (8 h / 30 min / revocación)
         "apps.users.authentication.SessionJWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        # Sesión por cookie (/api-auth/, Swagger) con los mismos límites de 8 h / 30 min
+        "apps.users.authentication.IdleSessionAuthentication",
     ),
     # Seguridad: todo endpoint exige autenticación salvo que declare
     # explícitamente permission_classes = [AllowAny].
@@ -236,9 +237,10 @@ SIMPLE_JWT = {
 # ==============================
 AUTH_SESSION_MAX_AGE = timedelta(hours=8)        # máximo absoluto desde el login
 AUTH_SESSION_IDLE_TIMEOUT = timedelta(minutes=30)  # sin actividad real del usuario
-# True: solo cuentan como actividad las peticiones que informan X-Client-Idle
-# (recomendado cuando todos los clientes de la API lo envíen).
-AUTH_ACTIVITY_HEADER_REQUIRED = os.environ.get("AUTH_ACTIVITY_HEADER_REQUIRED", "false").lower() in ("1", "true", "yes")
+# Solo cuentan como actividad las peticiones que informan X-Client-Idle; los
+# requests manuales, el polling y el refresh no extienden la sesión.
+# (false solo para compatibilidad con clientes que todavía no envían el header.)
+AUTH_ACTIVITY_HEADER_REQUIRED = os.environ.get("AUTH_ACTIVITY_HEADER_REQUIRED", "true").lower() in ("1", "true", "yes")
 # Proxies de confianza delante de Django (nginx del repo = 1). Se usa para
 # obtener la IP real del cliente desde X-Forwarded-For.
 AUTH_PROXY_COUNT = int(os.environ.get("AUTH_PROXY_COUNT", "1"))
