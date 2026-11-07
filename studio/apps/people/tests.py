@@ -80,13 +80,41 @@ class TestPeopleViewForUser:
         ids = [item['id'] for item in response.data]
         assert person.id in ids
 
-    def test_consultor_list_excludes_deleted(self, consultor_client):
+    def test_consultor_list_includes_deleted(self, consultor_client):
         person = Person.objects.create(name='Juan', last_name='Perez', dni='12345678')
         person.delete()
         response = consultor_client.get(reverse(self.URL))
         assert response.status_code == 200
         ids = [item['id'] for item in response.data]
+        assert person.id in ids
+
+    def test_super_list_includes_deleted(self, super_client):
+        person = Person.objects.create(name='Juan', last_name='Perez', dni='12345678')
+        person.delete()
+        response = super_client.get(reverse(self.URL))
+        assert response.status_code == 200
+        ids = [item['id'] for item in response.data]
+        assert person.id in ids
+
+    def test_usuario_sin_tipo_no_ve_eliminados(self, monkeypatch):
+        # Si los UserType no estuvieran sembrados, get_*_pk() devolveria None y el set
+        # contendria None: un user con tipo_usuario_id=None no debe ver eliminados.
+        from types import SimpleNamespace
+        from apps.people.views import PeopleViewSet
+        from apps.user_type.models import UserType
+        monkeypatch.setattr(UserType, 'get_super_pk', classmethod(lambda cls: None))
+        monkeypatch.setattr(UserType, 'get_administrador_pk', classmethod(lambda cls: None))
+        monkeypatch.setattr(UserType, 'get_consultor_pk', classmethod(lambda cls: None))
+        person = Person.objects.create(name='Juan', last_name='Perez', dni='12345678')
+        person.delete()
+        view = PeopleViewSet()
+        view.request = SimpleNamespace(user=SimpleNamespace(tipo_usuario_id=None))
+        ids = [p.id for p in view.get_queryset()]
         assert person.id not in ids
+
+    def test_alumno_sin_acceso_people(self, student_client):
+        response = student_client.get(reverse(self.URL))
+        assert response.status_code == 403
 
     def test_delete_endpoint_is_soft_delete(self, admin_client, monkeypatch):
         from apps.actions.models import Action
@@ -101,7 +129,7 @@ class TestPeopleViewForUser:
 
     def test_delete_endpoint_usa_timezone_now(self, admin_client, monkeypatch):
         # destroy() debe guardar deleted con timezone.now() (aware), no
-        # datetime.now() (naive) que corre la fecha bajo USE_TZ=True. deuda)
+        # datetime.now() (naive) que corre la fecha bajo USE_TZ=True.
         from datetime import datetime, timezone as dtz
         from apps.actions.models import Action
         monkeypatch.setattr(Action.objects, "create", lambda **kwargs: None)
@@ -389,7 +417,7 @@ class TestIdentitySyncViaAPI:
         assert person.phone == '999'
 
 
-# Soft-delete cascade: Person -> FixedSlot
+# ── Soft-delete cascade: Person → FixedSlot ───────────────────────────────────
 # Por qué: al eliminar suavemente una Person, sus turnos fijos activos deben
 # quedar también eliminados suavemente, para evitar turnos fijos huérfanos.
 
@@ -448,7 +476,7 @@ class TestPersonFixedSlotCascade:
 
 @pytest.mark.django_db
 class TestPersonNoLegacyPlan:
-    """ /people/ ya no expone el Plan legacy."""
+    """/people/ ya no expone el Plan legacy."""
     URL = 'people-list'
 
     def test_person_response_has_no_plan(self, admin_client, person):
@@ -458,11 +486,11 @@ class TestPersonNoLegacyPlan:
             assert 'plan' not in row
 
 
-# /people/ expone los planes activos del alumno, comentario Agostina)
+# ── /people/ expone los planes activos del alumno ──
 
 @pytest.mark.django_db
 class TestPersonActivePlansEmbedded:
-    """ /people/ expone active_plans (con plans_subtype) en vez del viejo campo plan."""
+    """/people/ expone active_plans (con plans_subtype) en vez del viejo campo plan."""
     URL = 'people-list'
 
     def _row_for(self, resp, person_id):
@@ -562,7 +590,7 @@ class TestFindConsumablePlan:
 
 @pytest.mark.django_db
 class TestDeletedPeopleDateFilterKAN149:
-    """ /deleted-people/ filtra por fecha de baja (deleted) con date_from
+    """/deleted-people/ filtra por fecha de baja (deleted) con date_from
     y date_to (obligatorios, YYYY-MM-DD, rango validado)."""
     URL = 'deleted-people-list'
 
