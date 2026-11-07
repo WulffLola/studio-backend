@@ -132,14 +132,15 @@ class PaymentViewSet(StudioFilterMixin, viewsets.ModelViewSet):
         (ver build_receipt_content). Guarda el PDF en payment.pdf_file y devuelve
         el path. Lanza ValueError si falla.
         """
+        import tempfile
+        import uuid
         today = datetime.now().strftime("%Y-%m-%d")
-        dni = person.dni
         formatted_payment_date = payment.date.strftime("%d-%m-%Y")
-        pdf_filename = f"CP_{today}_{dni}.pdf"
-        pdf_folder = os.path.join(settings.MEDIA_ROOT, 'payments')
-        if not os.path.exists(pdf_folder):
-            os.makedirs(pdf_folder)
-        pdf_path = os.path.join(pdf_folder, pdf_filename)
+        # Nombre no predecible (antes CP_<fecha>_<dni>.pdf, adivinable). El
+        # nombre "amigable" se usa solo al descargar / enviar por WhatsApp.
+        pdf_filename = f"{uuid.uuid4().hex}.pdf"
+        tmp_dir = tempfile.mkdtemp(prefix="cp_")
+        pdf_path = os.path.join(tmp_dir, pdf_filename)
 
         next_exp = min((ap.exp_date for ap in active_plans), default=None)
 
@@ -170,9 +171,13 @@ class PaymentViewSet(StudioFilterMixin, viewsets.ModelViewSet):
             with open(pdf_path, 'rb') as f:
                 payment.pdf_file.save(pdf_filename, File(f), save=True)
 
-            return pdf_path
+            from .storage import resolve_receipt_path
+            return resolve_receipt_path(payment.pdf_file)
         except Exception as e:
             raise ValueError(f"Error al generar el PDF: {str(e)}")
+        finally:
+            import shutil
+            shutil.rmtree(tmp_dir, ignore_errors=True)
 
     def send_pdf(self, pdf_path, person, message):
         url = os.getenv("API_WPP_SEND_PDF")
@@ -181,10 +186,12 @@ class PaymentViewSet(StudioFilterMixin, viewsets.ModelViewSet):
             raise ValueError("El usuario no tiene un número de teléfono registrado.")
 
         payload = {"number": phone_number, "message": message}
-        files = {"pdf": open(pdf_path, "rb")}
+        display_name = f"CP_{datetime.now().strftime('%Y-%m-%d')}_{person.dni}.pdf"
 
         try:
-            response = requests.post(url, data=payload, files=files)
+            with open(pdf_path, "rb") as fh:
+                files = {"pdf": (display_name, fh, "application/pdf")}
+                response = requests.post(url, data=payload, files=files)
             response.raise_for_status()
         except requests.RequestException as e:
             raise ValueError(f"Error al enviar el PDF: {e}")
@@ -199,12 +206,19 @@ class PaymentViewSet(StudioFilterMixin, viewsets.ModelViewSet):
         
         if not payment.pdf_file:
             return Response({"detail": "El archivo PDF no existe."}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Ruta al archivo PDF en el sistema
-        pdf_path = payment.pdf_file.path
-        if os.path.exists(pdf_path):
+
+        # Descarga autorizada: get_object() ya aplicó permisos de rol y el
+        # alcance por estudio (for_user). Busca en el almacenamiento actual y en
+        # la ubicación legada, sin mover archivos.
+        from .storage import resolve_receipt_path
+        pdf_path = resolve_receipt_path(payment.pdf_file)
+        if pdf_path:
+            dni = payment.person.dni if payment.person else payment.pk
+            filename = f"CP_{payment.date:%Y-%m-%d}_{dni}.pdf"
             response = FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(pdf_path)}"'
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Cache-Control'] = 'private, no-store'
+            response['X-Content-Type-Options'] = 'nosniff'
             return response
         else:
             return Response({"detail": "El archivo PDF no se encontró."}, status=status.HTTP_404_NOT_FOUND)

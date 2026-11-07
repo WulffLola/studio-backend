@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from apps.users.auth_views import SessionTokenRefreshView, TokenObtainView, SessionStatusView
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.urls import path, include
@@ -161,8 +161,9 @@ urlpatterns = [
     path("", include(routes.urls)),
     path('teacher-extra-hours/<int:teacher_id>/', TeacherExtraHoursViewSet.as_view({'get': 'list'}), name='teacher-extra-hours'),
     path('payments/download/<int:pk>/', PaymentViewSet.as_view({'get': 'download_pdf'}), name='download_pdf'),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path("token/refresh/", SessionTokenRefreshView.as_view(), name="token-refresh"),
+    path('token/', TokenObtainView.as_view(), name='token_obtain_pair'),
+    path('session/', SessionStatusView.as_view(), name='session-status'),
     path('logout/', UserLogoutViewSet.as_view(), name='logout'),
     path('api-auth/', include('rest_framework.urls')),  # Agregar esta línea para el login/logout
 ]

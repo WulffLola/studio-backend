@@ -187,17 +187,25 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        # JWT + validación de la sesión del lado servidor (8 h / 30 min / revocación)
+        "apps.users.authentication.SessionJWTAuthentication",
+        # Sesión por cookie (/api-auth/, Swagger) con los mismos límites de 8 h / 30 min
+        "apps.users.authentication.IdleSessionAuthentication",
+    ),
+    # Seguridad: todo endpoint exige autenticación salvo que declare
+    # explícitamente permission_classes = [AllowAny].
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
     ),
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),   # antes 365 días (no vencía)
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=14),   # antes 400 días
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
+    # El refresh nunca supera el máximo absoluto de la sesión (AUTH_SESSION_MAX_AGE).
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=8),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
-    "UPDATE_LAST_LOGIN": False,
+    "UPDATE_LAST_LOGIN": False,  # lo hace apps.users.sessions.issue_tokens
 
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
@@ -223,6 +231,36 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 
+
+# ==============================
+# Seguridad de sesiones
+# ==============================
+AUTH_SESSION_MAX_AGE = timedelta(hours=8)        # máximo absoluto desde el login
+AUTH_SESSION_IDLE_TIMEOUT = timedelta(minutes=30)  # sin actividad real del usuario
+# Solo cuentan como actividad las peticiones que informan X-Client-Idle; los
+# requests manuales, el polling y el refresh no extienden la sesión.
+# (false solo para compatibilidad con clientes que todavía no envían el header.)
+AUTH_ACTIVITY_HEADER_REQUIRED = os.environ.get("AUTH_ACTIVITY_HEADER_REQUIRED", "true").lower() in ("1", "true", "yes")
+# Proxies de confianza delante de Django (nginx del repo = 1). Se usa para
+# obtener la IP real del cliente desde X-Forwarded-For.
+AUTH_PROXY_COUNT = int(os.environ.get("AUTH_PROXY_COUNT", "1"))
+
+# Comprobantes de pago privados (apps/payments/storage.py). Vacío = modo legado
+# (MEDIA_ROOT/payments, servido por nginx). Para activarlo hace falta un volumen
+# persistente para esta ruta en el despliegue.
+PRIVATE_MEDIA_ROOT = os.environ.get("PRIVATE_MEDIA_ROOT", "")
+
+# Bloqueo de autenticación (apps.users.lockout)
+AUTH_LOCKOUT_MAX_FAILURES = 5
+AUTH_LOCKOUT_WINDOW = timedelta(minutes=15)
+AUTH_LOCKOUT_DURATION = timedelta(minutes=15)
+AUTH_IP_MAX_FAILURES = 20      # fallos por IP en la ventana (todas las cuentas)
+AUTH_IP_MAX_REQUESTS = 30      # registro / recuperación: peticiones por IP en la ventana
+PASSWORD_RESET_TIMEOUT = 3600  # 1 h, enlaces de recuperación de un solo uso
+AUTHENTICATION_BACKENDS = ["apps.users.backends.LockoutModelBackend"]
+
+from corsheaders.defaults import default_headers as _cors_default_headers  # noqa: E402
+CORS_ALLOW_HEADERS = (*_cors_default_headers, "x-client-idle")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

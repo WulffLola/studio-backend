@@ -116,12 +116,29 @@ class RegisterNewSerializer(serializers.Serializer):
     phone = serializers.CharField(required=False, allow_blank=True)
     birth_date = serializers.DateField(required=False, allow_null=True)
 
+    def validate(self, attrs):
+        _validate_registration_password(attrs)
+        return attrs
+
+
+def _validate_registration_password(attrs):
+    from .passwords import validate_new_password
+    candidate = CustomUser(
+        email=attrs.get("email", ""), dni=attrs.get("dni", ""),
+        name=attrs.get("name", ""), last_name=attrs.get("last_name", ""),
+    )
+    validate_new_password(attrs["password"], candidate)
+
 
 class RegisterExistingSerializer(serializers.Serializer):
     """Registro de alumno que ya existe en people."""
     dni = serializers.CharField()
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        _validate_registration_password(attrs)
+        return attrs
 
 
 class PasswordResetSerializer(serializers.Serializer):
@@ -130,7 +147,8 @@ class PasswordResetSerializer(serializers.Serializer):
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
     token = serializers.CharField()
-    password = serializers.CharField(write_only=True, min_length=6)
+    # La política de longitud/complejidad la aplican AUTH_PASSWORD_VALIDATORS en la vista.
+    password = serializers.CharField(write_only=True)
 
 
 class UserPhotoSerializer(serializers.ModelSerializer):
@@ -156,19 +174,31 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
+        from django.contrib.auth.hashers import make_password
+        from . import lockout
+
         identifier = data["identifier"]
         password = data["password"]
+        request = self.context.get("request")
+
+        # Bloqueo temporal por cuenta (email y DNI comparten contador) y por IP.
+        key = lockout.account_key(identifier)
+        lockout.check(request, key)
 
         try:
             user = CustomUser.objects.get(
-                Q(email__iexact=identifier) | Q(dni=identifier),
+                Q(email__iexact=identifier.strip()) | Q(dni=identifier.strip()),
                 deleted__isnull=True,
                 is_active=True,
             )
-        except CustomUser.DoesNotExist:
+        except (CustomUser.DoesNotExist, CustomUser.MultipleObjectsReturned):
+            make_password(password)  # tiempo similar al caso "existe": no revela cuentas
+            lockout.register_failure(request, key)
             raise serializers.ValidationError("Credenciales incorrectas")
 
         if not user.check_password(password):
+            lockout.register_failure(request, key)
             raise serializers.ValidationError("Credenciales incorrectas")
 
+        lockout.register_success(key)
         return user
