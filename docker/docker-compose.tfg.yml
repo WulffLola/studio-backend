@@ -1,0 +1,46 @@
+name: studio_tfg
+
+services:
+  studio_tfg_db:
+    image: postgres:13.2
+    container_name: STUDIO_TFG_DB
+    restart: always
+    env_file: .env
+    volumes:
+      - /var/virtualhosts/tfg/volumes/postgres:/var/lib/postgresql/data
+    networks:
+      studio_tfg_net:
+        aliases: [db]
+
+  studio_tfg_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: studio_tfg_backend
+    container_name: STUDIO_TFG_BACKEND
+    restart: always
+    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn studio.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    env_file: .env
+    volumes:
+      - ../studio:/studio
+      - /var/virtualhosts/tfg/volumes/static:/studio/static
+      - /var/virtualhosts/tfg/volumes/media:/studio/media
+    depends_on: [studio_tfg_db]
+    networks: [studio_tfg_net]
+
+  studio_tfg_nginx:
+    image: nginx:alpine
+    container_name: STUDIO_TFG_NGINX
+    restart: always
+    ports:
+      - "127.0.0.1:8526:80"
+    volumes:
+      - ./nginx.tfg.conf:/etc/nginx/conf.d/default.conf:ro
+      - /var/virtualhosts/tfg/volumes/static:/studio/static:ro
+      - /var/virtualhosts/tfg/volumes/media:/studio/media:ro
+    depends_on: [studio_tfg_backend]
+    networks: [studio_tfg_net]
+
+networks:
+  studio_tfg_net:
+    name: studio_tfg_net
