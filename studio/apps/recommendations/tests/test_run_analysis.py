@@ -114,7 +114,9 @@ def test_own_waitlist_no_longer_triggers_relocate(room, person, activity_subtype
     WaitingList.objects.create(person=person, slot=Slot.objects.filter(room=room).first())
     analysis = run_analysis(default_params())
     assert analysis.recommendations.filter(type='relocate').count() == 0
-    assert analysis.recommendations.filter(type='reduce').count() == 1
+    # con lista de espera propia no se recomienda reducir (D5, HU-19 c.3)
+    assert analysis.recommendations.filter(type='reduce').count() == 0
+    assert len(analysis.run_summary['baja_con_lista_de_espera']) == 1
 
 
 @pytest.mark.django_db
@@ -124,15 +126,13 @@ def test_alternative_respects_room_capacity(room, person, activity_subtype):
     room.save()
     _make_past_mondays(room, person, n=8, confirmed=10, availability=0, activity_subtype=activity_subtype)
     analysis = run_analysis(default_params())
-    r = analysis.recommendations.get(type='add')
-    assert r.proposed_alternative is None  # unica sala (cap 5) < cupos 10
+    # unica sala (cap 5) < cupos 10: sin recurso no hay recomendacion «add» (D2),
+    # la alta demanda queda en el resumen del analisis
+    assert analysis.recommendations.filter(type='add').count() == 0
+    assert len(analysis.run_summary['alta_demanda_sin_recurso']) == 1
     # sala grande que aloja la actividad -> se propone
     big = Room.objects.create(name='Sala grande', studio=room.studio, capacity=12)
     _make_past_slot(big, 3, time(7, 0), time(8, 0), activity_subtype)
-    r.state = 'discarded'
-    r.save()
-    from apps.recommendations.models import Recommendation
-    Recommendation.objects.all().delete()
     analysis = run_analysis(default_params())
     r = analysis.recommendations.get(type='add')
     assert r.proposed_alternative['room_id'] == big.id

@@ -7,7 +7,9 @@ from django.utils import timezone
 
 from apps.appointments.models import Appointment
 from apps.rooms.models import Room
-from apps.slots.models import FixedSlot, Slot
+from apps.slots.models import FixedSlot, Slot, SlotTemplate
+from apps.slots.services import WEEKDAY_NAMES
+from apps.teachers_turn.models import TeachersTurn
 from apps.waiting_list.models import WaitingList
 
 from .models import Recommendation, RecommendationAnalysis
@@ -55,26 +57,58 @@ def classify(occupancies, params):
 FranjaKey = namedtuple('FranjaKey', 'studio_id room_id activity_subtype_id weekday start_time')
 
 
+def class_start(slot):
+    """Inicio de la clase como datetime con zona horaria (la del proyecto)."""
+    return timezone.make_aware(datetime.combine(slot.date, slot.start_time),
+                               timezone.get_current_timezone())
+
+
+def late_cancellations(slots):
+    """Reservas dadas de baja despues del inicio de su clase, por slot.
+
+    Esas reservas estaban confirmadas al empezar la clase: cuentan para la
+    ocupacion historica aunque hoy figuren dadas de baja. No se modifica nada.
+    """
+    starts = {s.id: class_start(s) for s in slots}
+    late = defaultdict(int)
+    if not starts:
+        return late
+    rows = (Appointment.all_objects
+            .filter(slot_id__in=list(starts), deleted__isnull=False)
+            .values_list('slot_id', 'deleted'))
+    for slot_id, deleted in rows:
+        if deleted > starts[slot_id]:
+            late[slot_id] += 1
+    return late
+
+
 def scan_franjas(window_start, window_end):
     """Devuelve (ocupaciones por franja, meta por franja).
 
+    La ocupacion de cada clase usa las reservas confirmadas al inicio de la
+    clase: las vigentes mas las dadas de baja despues de ese momento.
     meta = {'end_time': end_time de la ultima observacion, 'cupos': maximo de cupos observado}.
     """
-    slots = (
+    slots = list(
         Slot.objects
         .filter(date__gte=window_start, date__lt=window_end,
                 date__isnull=False, start_time__isnull=False, room__isnull=False)
         .select_related('room')
         .annotate(confirmed=Count('appointments', filter=Q(appointments__deleted__isnull=True)))
     )
+    late = late_cancellations(slots)
     franjas = defaultdict(list)
     meta = {}
     last_date = {}
     for s in slots:
         key = FranjaKey(s.room.studio_id, s.room_id, s.activity_subtype_id,
                         s.date.weekday(), s.start_time)
-        franjas[key].append(occupancy_of(s.confirmed or 0, s.availability))
-        cupos = (s.availability or 0) + (s.confirmed or 0)
+        active = s.confirmed or 0
+        # cupos habilitados: cada baja devuelve su lugar a availability, asi que
+        # disponibles + vigentes conserva los cupos de la clase.
+        cupos = (s.availability or 0) + active
+        at_start = active + late.get(s.id, 0)
+        franjas[key].append(occupancy_of(at_start, max(cupos - at_start, 0)))
         m = meta.setdefault(key, {'end_time': None, 'cupos': 0})
         m['cupos'] = max(m['cupos'], cupos)
         if s.end_time is not None and (key not in last_date or s.date >= last_date[key]):
@@ -134,7 +168,12 @@ def compatible_rooms(studio_id, activity_subtype_id):
 
 
 def has_conflict(room_id, weekday, start_time, end_time):
-    """True si hay un slot futuro en la sala/weekday que solapa [start_time, end_time)."""
+    """True si la sala esta ocupada ese dia de la semana en [start_time, end_time):
+    por una plantilla activa (grilla vigente) o por un slot futuro ya generado."""
+    if SlotTemplate.objects.filter(
+            room_id=room_id, is_active=True, days_of_week__day=WEEKDAY_NAMES[weekday],
+            start_time__lt=end_time, end_time__gt=start_time).exists():
+        return True
     today = timezone.now().date()
     overlap = (Q(start_time__lt=end_time, end_time__gt=start_time)
                | Q(end_time__isnull=True, start_time=start_time))  # sin end_time: igualdad de start
@@ -149,6 +188,38 @@ def _shift_end(origin_start, origin_end, new_start):
     base = datetime(2000, 1, 1)
     dur = datetime.combine(base, origin_end) - datetime.combine(base, origin_start)
     return (datetime.combine(base, new_start) + dur).time()
+
+
+def franja_teachers(key):
+    """Profesoras asignadas a las clases futuras de la franja (programacion vigente)."""
+    today = timezone.now().date()
+    ids = set()
+    for t in TeachersTurn.objects.filter(
+            slot__room_id=key.room_id, slot__start_time=key.start_time,
+            slot__date__gte=today).select_related('slot'):
+        if t.slot.date.weekday() == key.weekday and t.teacher_id:
+            ids.add(t.teacher_id)
+    return ids
+
+
+def teacher_conflict(teacher_ids, weekday, start_time, end_time, exclude_key=None):
+    """True si alguna profesora ya tiene asignada otra clase futura que se superpone
+    (en cualquier sala o sede) con ese dia y horario."""
+    if not teacher_ids:
+        return False
+    today = timezone.now().date()
+    turns = (TeachersTurn.objects
+             .filter(teacher_id__in=teacher_ids, slot__date__gte=today,
+                     slot__start_time__lt=end_time, slot__end_time__gt=start_time)
+             .select_related('slot'))
+    for t in turns:
+        s = t.slot
+        if s.date.weekday() != weekday:
+            continue
+        if exclude_key and (s.room_id, s.start_time) == (exclude_key.room_id, exclude_key.start_time):
+            continue
+        return True
+    return False
 
 
 def default_params():
@@ -186,6 +257,8 @@ def run_analysis(params, user=None):
     }
     insuficientes = 0
     generadas = 0
+    alta_sin_recurso = []
+    baja_con_espera = []
     for key, occs in franjas.items():
         kind = classify(occs, params)
         if kind == 'insufficient':
@@ -199,14 +272,34 @@ def run_analysis(params, user=None):
         affected = affected_count(key.room_id, key.activity_subtype_id, key.weekday, key.start_time, window_start, window_end)
         pending_conditions = ['equipamiento', 'disponibilidad_profesora']
 
+        franja_info = {
+            'studio_id': key.studio_id, 'room_id': key.room_id,
+            'activity_subtype_id': key.activity_subtype_id, 'weekday': key.weekday,
+            'start_time': key.start_time.strftime('%H:%M:%S'), 'observaciones': len(occs),
+            'ocupacion_promedio': round(occupancy_avg, 4), 'lista_de_espera': wl,
+        }
         if kind == 'high':
-            type_ = 'add'
             alternative = _find_alternative(key, prefer_free=True, meta=meta.get(key))
+            if alternative is None:
+                # HU-19 c.1: sin recurso compatible y disponible no hay recomendacion
+                # ejecutable; la alta demanda se informa en el resumen del analisis.
+                alta_sin_recurso.append(franja_info)
+                continue
+            type_ = 'add'
         else:  # low
-            dest = _find_relocate_destination(key, franjas, meta, params, window_start, window_end)
+            teachers = franja_teachers(key)
+            dest = _find_relocate_destination(key, franjas, meta, params, window_start, window_end,
+                                              teachers=teachers)
             if dest is not None:
                 type_ = 'relocate'
                 alternative = dest
+                if teachers:
+                    # superposicion con la programacion de las profesoras ya verificada
+                    pending_conditions.remove('disponibilidad_profesora')
+            elif wl > 0:
+                # HU-19 c.3: la lista de espera propia es evidencia para mantener la oferta.
+                baja_con_espera.append(franja_info)
+                continue
             else:
                 type_ = 'reduce'
                 alternative = _find_alternative(key, prefer_free=True, meta=meta.get(key))
@@ -229,6 +322,8 @@ def run_analysis(params, user=None):
         'franjas_analizadas': len(franjas),
         'insuficientes': insuficientes,
         'generadas': generadas,
+        'alta_demanda_sin_recurso': alta_sin_recurso,
+        'baja_con_lista_de_espera': baja_con_espera,
     }
     return analysis
 
@@ -263,7 +358,7 @@ def _find_alternative(key, prefer_free, meta=None):
     return None
 
 
-def _find_relocate_destination(key, franjas, meta, params, window_start, window_end):
+def _find_relocate_destination(key, franjas, meta, params, window_start, window_end, teachers=None):
     """Horario (weekday, hora) con demanda en OTRAS franjas de la misma actividad
     donde una sala compatible esta libre y tiene capacidad."""
     m = meta.get(key)
@@ -287,6 +382,8 @@ def _find_relocate_destination(key, franjas, meta, params, window_start, window_
         end = _shift_end(key.start_time, origin_end, start)
         for r in rooms:
             if has_conflict(r.id, wd, start, end) or not _room_fits(r, cupos):
+                continue
+            if teacher_conflict(teachers, wd, start, end, exclude_key=key):
                 continue
             return {'room_id': r.id, 'room_name': r.name, 'weekday': wd,
                     'start_time': start.strftime('%H:%M:%S'), 'is_new_slot': True}
