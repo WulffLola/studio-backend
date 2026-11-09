@@ -48,7 +48,7 @@ studio-backend/
     │   ├── statistics/     # indicadores
     │   ├── recommendations/
     │   └── ...
-    ├── data_seed/          # datos de prueba
+    ├── data_seed/          # fixtures JSON antiguos (los datos de prueba se generan con seed_all)
     └── conftest.py         # fixtures compartidas de los tests
 ```
 
@@ -64,9 +64,14 @@ Cada app sigue la misma organización: `models.py`, `serializer.py`, `views.py`,
 
 No hace falta instalar Python ni PostgreSQL: todo corre dentro de los contenedores.
 
-### 2. Descomprimir
+### 2. Obtener el código
 
-Descomprimir `studio-backend.zip` y abrir una terminal dentro de la carpeta `studio-backend`.
+```bash
+git clone https://github.com/WulffLola/studio-backend.git
+cd studio-backend
+```
+
+O descomprimir `studio-backend.zip` y abrir una terminal dentro de la carpeta `studio-backend`.
 
 ### 3. Levantar
 
@@ -96,17 +101,19 @@ El backend espera a que la base de datos esté lista antes de arrancar, así que
 docker compose exec studio_testing_backend python manage.py seed_all
 ```
 
-Carga estudios, salas, actividades, planes y precios, profesores, alumnos, turnos, reservas, pagos y gastos de ejemplo. Usuarios para entrar (todos con la contraseña `studio1234`):
+Vacía la base y genera un sistema completo con datos ficticios y fechas alrededor de hoy: 2 sedes (*Aura Casanova* y *Aura Colón*) con 3 salas, plantillas de horario y clases desde 8 semanas atrás hasta 3 semanas adelante, 9 profesoras con sus turnos y horas, unos 60 alumnos con planes, turnos fijos, reservas y algunas bajas, pagos, gastos, notas, recetas y publicaciones. Tarda unos segundos y se puede volver a correr para empezar de cero.
 
-| Usuario | Rol |
-|---|---|
-| `super@studio.local` | Super |
-| `admin@studio.local` | Administrador |
-| `recepcion@studio.local` | Consultor |
+Usuarios para entrar (todos con la contraseña `studio1234`):
 
-Los pagos y gastos de ejemplo se ubican en los últimos días (el más reciente, hoy en *Studio Central*), así la caja y las estadísticas muestran datos.
+| Usuario | Rol | Código de acciones |
+|---|---|---|
+| `super@studio.local` | Super | `1111` |
+| `admin@studio.local` | Administrador | `2222` |
+| `recepcion@studio.local` | Consultor | `3333` |
 
-El Consultor (recepción) puede dar de baja alumnos, pagos y gastos, pero tiene que ingresar su código personal de 4 dígitos: así queda registrado quién lo hizo en *Acciones*. El código del usuario de prueba `recepcion@studio.local` es `3444`.
+El Consultor (recepción) puede dar de baja alumnos, pagos y gastos, pero tiene que ingresar su código personal de 4 dígitos: así queda registrado quién lo hizo en *Acciones*.
+
+Para más o menos alumnos: `python manage.py seed_all --alumnos 120`. El comando `seed_demo --reset` carga la versión grande (300 alumnos) que se usa en la demo publicada, con su propio usuario.
 
 ### 5. Probar
 
@@ -127,7 +134,7 @@ Para usar la interfaz web, seguir los pasos del README de `studio-frontend`.
 docker compose down
 ```
 
-Los datos quedan guardados en la carpeta `data_local/`. Para empezar de cero, borrar esa carpeta y volver al paso 3.
+Los datos quedan guardados en la carpeta `data_local/`. Para empezar de cero alcanza con volver a correr `seed_all`.
 
 ## Instalación sin Docker (opcional)
 
@@ -170,6 +177,13 @@ python manage.py migrate
 python manage.py collectstatic --noinput   # necesario si DEBUG=false (estilos de Swagger y Redoc)
 python manage.py seed_all
 python manage.py runserver
+```
+
+La API queda en `http://localhost:8000/`, igual que con Docker. En cada terminal nueva hay que volver a cargar las variables (paso 3) antes de usar `manage.py`:
+
+```bash
+set -a; source .env.local; set +a
+cd studio && python manage.py runserver
 ```
 
 ## Tests

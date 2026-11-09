@@ -62,6 +62,16 @@ DEMO_USER = {
     "dni": "30481222",  # código de acciones = últimos 4 dígitos → 1222
 }
 
+# Usuarios para levantar el proyecto en local (seed_all / --usuarios-locales),
+# uno por rol. El código de acciones son los últimos 4 dígitos del DNI.
+LOCAL_PASSWORD = "studio1234"
+LOCAL_USERS = [
+    # (email, nombre, apellido, dni, tipo_usuario_id)
+    ("super@studio.local", "Sofía", "Super", "30111111", 1),
+    ("admin@studio.local", "Ana", "Admin", "30222222", 2),
+    ("recepcion@studio.local", "Rocío", "Recepción", "30333333", 3),  # rol Consultor
+]
+
 SEED = 20261103
 WEEKS_BACK = 8
 WEEKS_FORWARD = 3
@@ -174,6 +184,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--reset", action="store_true",
                             help="Obligatorio: confirma que se borran TODOS los datos actuales.")
+        parser.add_argument("--alumnos", type=int, default=300,
+                            help="Cantidad de alumnos activos (300 por defecto).")
+        parser.add_argument("--usuarios-locales", action="store_true",
+                            help="Crea los usuarios super@, admin@ y recepcion@studio.local "
+                                 "(contraseña studio1234) en lugar del usuario demo.")
 
     def handle(self, *args, **opts):
         if not opts["reset"]:
@@ -184,6 +199,8 @@ class Command(BaseCommand):
         self.start = monday - timedelta(weeks=WEEKS_BACK)
         self.end = monday + timedelta(weeks=WEEKS_FORWARD) - timedelta(days=1)
         self.used_dni = set()
+        self.n_alumnos = max(1, opts.get("alumnos") or 300)
+        self.local_users = bool(opts.get("usuarios_locales"))
 
         self.stdout.write("Vaciando base…")
         call_command("flush", interactive=False, verbosity=0)
@@ -251,6 +268,17 @@ class Command(BaseCommand):
             self.exp_types[n] = ExpenseType.objects.create(name=n)
 
     def _user(self):
+        if self.local_users:
+            for email, name, last_name, dni, tipo in LOCAL_USERS:
+                self.used_dni.add(dni)
+                u = CustomUser.objects.create_user(
+                    email=email, name=name, last_name=last_name, password=LOCAL_PASSWORD, dni=dni,
+                    tipo_usuario_id=tipo, phone="2914550100", sex="Femenino", birth_date=date(1990, 1, 1),
+                    is_staff=(tipo == 1), is_superuser=(tipo == 1),
+                )
+                if tipo == 1:
+                    self.user = u
+            return
         u = CustomUser.objects.create_user(
             email=DEMO_USER["email"], name=DEMO_USER["name"], last_name=DEMO_USER["last_name"],
             password=DEMO_USER["password"], dni=DEMO_USER["dni"], tipo_usuario_id=1,
@@ -385,8 +413,8 @@ class Command(BaseCommand):
         """Arma el padrón y asigna a cada alumno un perfil (plan + sede + horarios)."""
         rng = self.rng
         self.profiles = []  # dicts con person + datos
-        n_active = 300
-        n_bajas = 24
+        n_active = self.n_alumnos
+        n_bajas = 24 if n_active == 300 else max(3, round(n_active * 0.08))
         for i in range(n_active + n_bajas):
             baja = i >= n_active
             # antigüedad: mayoría de hace meses; ~30 altas dentro de la ventana
@@ -903,6 +931,12 @@ class Command(BaseCommand):
             cap = room.capacity * ps.count()
             booked = Appointment.objects.filter(slot__in=ps).count()
             s.write(f"  Ocupación {room} : {booked / cap * 100:.1f} %")
-        s.write(self.style.WARNING(
-            f"\n  Usuario: {DEMO_USER['email']} · Contraseña: {DEMO_USER['password']} · "
-            f"Código de acciones: {DEMO_USER['dni'][-4:]}"))
+        if self.local_users:
+            s.write(self.style.WARNING(f"\n  Contraseña de todos los usuarios: {LOCAL_PASSWORD}"))
+            for email, _, _, dni, tipo in LOCAL_USERS:
+                rol = {1: "Super", 2: "Administrador", 3: "Consultor"}[tipo]
+                s.write(self.style.WARNING(f"  {email} ({rol}) · Código de acciones: {dni[-4:]}"))
+        else:
+            s.write(self.style.WARNING(
+                f"\n  Usuario: {DEMO_USER['email']} · Contraseña: {DEMO_USER['password']} · "
+                f"Código de acciones: {DEMO_USER['dni'][-4:]}"))
