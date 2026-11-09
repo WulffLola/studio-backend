@@ -126,6 +126,8 @@ curl -X POST http://localhost:8000/login/ -H "Content-Type: application/json" \
 
 La respuesta trae `tokens.access`, que se manda en cada pedido como `Authorization: Bearer <token>`.
 
+El análisis de recomendaciones se ejecuta desde la API con un usuario Administrador o Super: `POST /recommendations/analyze/` con cuerpo `{}` usa los parámetros por defecto (8 semanas, umbrales de 80 % y 50 %, 60 % de recurrencia y mínimo de 8 clases). Los resultados se consultan en `GET /recommendation-analyses/` y `GET /recommendations/`. En la interfaz web, la pantalla de recomendaciones todavía muestra datos de ejemplo.
+
 Para usar la interfaz web, seguir los pasos del README de `studio-frontend`.
 
 ### 6. Apagar
@@ -214,6 +216,9 @@ Todas están en [`docker/.env.example`](docker/.env.example). Las principales:
 | `FRONTEND_URL` | URL del front, usada en los links de los emails. |
 | `API_WPP_*` | Endpoints del servicio de WhatsApp (opcional). |
 | `BREVO_*` | Envío de emails de verificación y recuperación (opcional). |
+| `PRIVATE_MEDIA_ROOT` | Carpeta privada para los comprobantes de pago. Vacía, usa la carpeta por defecto. |
+
+WhatsApp y correo son opcionales: si sus variables quedan vacías, el sistema funciona y omite los envíos. Para uso local alcanzan los valores de ejemplo.
 
 ## Documentación de la API
 
