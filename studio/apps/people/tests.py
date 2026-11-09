@@ -129,7 +129,7 @@ class TestPeopleViewForUser:
 
     def test_delete_endpoint_usa_timezone_now(self, admin_client, monkeypatch):
         # destroy() debe guardar deleted con timezone.now() (aware), no
-        # datetime.now() (naive) que corre la fecha bajo USE_TZ=True. deuda)
+        # datetime.now() (naive) que corre la fecha bajo USE_TZ=True.
         from datetime import datetime, timezone as dtz
         from apps.actions.models import Action
         monkeypatch.setattr(Action.objects, "create", lambda **kwargs: None)
@@ -417,7 +417,7 @@ class TestIdentitySyncViaAPI:
         assert person.phone == '999'
 
 
-# Soft-delete cascade: Person -> FixedSlot
+# ── Soft-delete cascade: Person → FixedSlot ───────────────────────────────────
 # Por qué: al eliminar suavemente una Person, sus turnos fijos activos deben
 # quedar también eliminados suavemente, para evitar turnos fijos huérfanos.
 
@@ -476,7 +476,7 @@ class TestPersonFixedSlotCascade:
 
 @pytest.mark.django_db
 class TestPersonNoLegacyPlan:
-    """ /people/ ya no expone el Plan legacy."""
+    """/people/ ya no expone el Plan legacy."""
     URL = 'people-list'
 
     def test_person_response_has_no_plan(self, admin_client, person):
@@ -486,11 +486,11 @@ class TestPersonNoLegacyPlan:
             assert 'plan' not in row
 
 
-# /people/ expone los planes activos del alumno, comentario Agostina)
+# ── /people/ expone los planes activos del alumno ──
 
 @pytest.mark.django_db
 class TestPersonActivePlansEmbedded:
-    """ /people/ expone active_plans (con plans_subtype) en vez del viejo campo plan."""
+    """/people/ expone active_plans (con plans_subtype) en vez del viejo campo plan."""
     URL = 'people-list'
 
     def _row_for(self, resp, person_id):
@@ -590,7 +590,7 @@ class TestFindConsumablePlan:
 
 @pytest.mark.django_db
 class TestDeletedPeopleDateFilterKAN149:
-    """ /deleted-people/ filtra por fecha de baja (deleted) con date_from
+    """/deleted-people/ filtra por fecha de baja (deleted) con date_from
     y date_to (obligatorios, YYYY-MM-DD, rango validado)."""
     URL = 'deleted-people-list'
 
